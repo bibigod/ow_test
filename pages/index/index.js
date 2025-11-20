@@ -99,6 +99,14 @@ Page({
     this.updateHeroLists();
   },
 
+  // 跳转到分析区域
+  scrollToAnalysis: function() {
+    wx.pageScrollTo({
+      selector: '#analysis-section',
+      duration: 300
+    });
+  },
+
   // 计算克制关系
   calculateCounters() {
     const { selectedEnemies } = this.data;
@@ -225,14 +233,6 @@ Page({
     }
 
     return parts;
-  },
-
-  // 跳转到分析区域
-  scrollToAnalysis() {
-    wx.pageScrollTo({
-      selector: '#analysis-section',
-      duration: 300
-    });
   },
 
   // 检查英雄是否被选中
