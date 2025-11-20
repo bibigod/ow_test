@@ -1,8 +1,8 @@
 <!--pages/index/index.wxml-->
 <view class="container">
   <!-- 浮动跳转按钮 -->
-  <view wx:if="{{showScrollBtn}}" class="scroll-btn" bindtap="scrollToAnalysis">
-    <text class="scroll-btn-icon">↓</text>
+  <view wx:if="{{selectedEnemies.length > 0}}" class="scroll-btn" bindtap="scrollToAnalysis">
+    <text class="scroll-btn-icon">⚡</text>
   </view>
 
   <!-- 顶部标题 -->

@@ -613,18 +613,17 @@
 /* 浮动跳转按钮 */
 .scroll-btn {
   position: fixed;
-  left: 24rpx;
-  bottom: 120rpx;
-  width: 80rpx;
-  height: 80rpx;
+  left: 30rpx;
+  bottom: 200rpx;
+  width: 90rpx;
+  height: 90rpx;
   background: linear-gradient(135deg, #f99e1a, #f97316);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8rpx 24rpx rgba(249, 158, 26, 0.4);
-  z-index: 1000;
-  animation: pulse 2s infinite;
+  box-shadow: 0 8rpx 24rpx rgba(249, 158, 26, 0.5);
+  z-index: 9999;
 }
 
 .scroll-btn-icon {
