@@ -324,6 +324,13 @@
   border: 2rpx solid #e2e8f0;
 }
 
+.rec-hero-name {
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #1e293b;
+  text-align: center;
+}
+
 .mvp-badge {
   display: flex;
   align-items: center;
@@ -343,18 +350,7 @@
 }
 
 .rec-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 12rpx;
-}
-
-.rec-name {
-  font-size: 24rpx;
-  font-weight: 700;
-  color: #1e293b;
-  text-align: center;
-  margin-bottom: 8rpx;
 }
 
 .rec-score {
