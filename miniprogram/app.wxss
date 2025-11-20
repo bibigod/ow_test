@@ -1,0 +1,260 @@
+/* app.wxss - 全局样式 */
+
+/* 重置默认样式 */
+page {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #f8fafc;
+  color: #1e293b;
+  font-size: 28rpx;
+  line-height: 1.5;
+}
+
+/* 通用工具类 */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-sm {
+  gap: 16rpx;
+}
+
+.gap-md {
+  gap: 24rpx;
+}
+
+.gap-lg {
+  gap: 32rpx;
+}
+
+/* 文字样式 */
+.text-xs {
+  font-size: 20rpx;
+}
+
+.text-sm {
+  font-size: 24rpx;
+}
+
+.text-base {
+  font-size: 28rpx;
+}
+
+.text-lg {
+  font-size: 32rpx;
+}
+
+.text-xl {
+  font-size: 40rpx;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-black {
+  font-weight: 900;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* 颜色 */
+.text-slate-400 {
+  color: #94a3b8;
+}
+
+.text-slate-500 {
+  color: #64748b;
+}
+
+.text-slate-600 {
+  color: #475569;
+}
+
+.text-slate-700 {
+  color: #334155;
+}
+
+.text-slate-800 {
+  color: #1e293b;
+}
+
+.text-orange {
+  color: #f99e1a;
+}
+
+.text-red {
+  color: #ef4444;
+}
+
+.text-blue {
+  color: #00d4ff;
+}
+
+.text-green {
+  color: #22c55e;
+}
+
+.bg-white {
+  background-color: #ffffff;
+}
+
+.bg-slate-50 {
+  background-color: #f8fafc;
+}
+
+.bg-slate-100 {
+  background-color: #f1f5f9;
+}
+
+/* 边框 */
+.border {
+  border: 2rpx solid #e2e8f0;
+}
+
+.border-slate-200 {
+  border-color: #e2e8f0;
+}
+
+.border-dashed {
+  border-style: dashed;
+}
+
+.rounded {
+  border-radius: 8rpx;
+}
+
+.rounded-lg {
+  border-radius: 16rpx;
+}
+
+.rounded-full {
+  border-radius: 9999rpx;
+}
+
+/* 阴影 */
+.shadow-sm {
+  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.05);
+}
+
+.shadow {
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+/* 内边距 */
+.p-sm {
+  padding: 16rpx;
+}
+
+.p-md {
+  padding: 24rpx;
+}
+
+.p-lg {
+  padding: 32rpx;
+}
+
+.px-sm {
+  padding-left: 16rpx;
+  padding-right: 16rpx;
+}
+
+.py-sm {
+  padding-top: 16rpx;
+  padding-bottom: 16rpx;
+}
+
+/* 外边距 */
+.m-sm {
+  margin: 16rpx;
+}
+
+.mb-sm {
+  margin-bottom: 16rpx;
+}
+
+.mb-md {
+  margin-bottom: 24rpx;
+}
+
+.mb-lg {
+  margin-bottom: 32rpx;
+}
+
+.mt-sm {
+  margin-top: 16rpx;
+}
+
+.mt-md {
+  margin-top: 24rpx;
+}
+
+/* 宽度 */
+.w-full {
+  width: 100%;
+}
+
+/* 动画 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideUp {
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 斜切效果 */
+.skew-container {
+  transform: skewX(-12deg);
+}
+
+.skew-content {
+  transform: skewX(12deg);
+}
