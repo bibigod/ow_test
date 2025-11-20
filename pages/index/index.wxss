@@ -611,30 +611,23 @@
   position: fixed;
   left: 24rpx;
   bottom: 160rpx;
-  padding: 16rpx 24rpx;
-  background: #00d4ff;
+  padding: 16rpx 20rpx;
+  background: #1e293b;
   border-radius: 40rpx;
   display: flex;
   align-items: center;
-  box-shadow: 0 8rpx 24rpx rgba(0, 212, 255, 0.3);
+  gap: 8rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.3);
   z-index: 9999;
+}
+
+.scroll-btn-icon {
+  font-size: 28rpx;
 }
 
 .scroll-btn-label {
   font-size: 24rpx;
   color: #fff;
-  font-weight: 600;
-}
-
-/* 返回顶部按钮 */
-.back-to-top {
-  margin-top: 48rpx;
-  padding: 24rpx;
-  background: #f1f5f9;
-  border-radius: 12rpx;
-  text-align: center;
-  color: #64748b;
-  font-size: 26rpx;
   font-weight: 600;
 }
 

@@ -107,14 +107,6 @@ Page({
     });
   },
 
-  // 返回顶部
-  scrollToTop: function() {
-    wx.pageScrollTo({
-      scrollTop: 0,
-      duration: 300
-    });
-  },
-
   // 计算克制关系
   calculateCounters() {
     const { selectedEnemies } = this.data;
