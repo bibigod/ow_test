@@ -168,6 +168,7 @@
             class="hero-recommendation {{item.score === calculatedCounters.maxScores.tank && calculatedCounters.maxScores.tank > 1 && item.risks.length === 0 ? 'mvp' : ''}}"
           >
             <view class="rec-left">
+              <text class="rec-name">{{item.name}}</text>
               <image
                 class="rec-avatar"
                 src="{{'/images/' + (item.fullEntry.id === 'wrecking-ball' ? 'ball' : item.fullEntry.id === 'soldier-76' ? 'soldier76' : item.fullEntry.id === 'junker-queen' ? 'junkerqueen' : item.fullEntry.id === 'venture' ? '探奇' : item.fullEntry.id === 'hazard' ? '骇灾' : item.fullEntry.id === 'freja' ? '芙蕾雅' : item.fullEntry.id === 'wuyang' ? '无漾' : item.fullEntry.id) + '.png'}}"
@@ -179,7 +180,6 @@
             </view>
             <view class="rec-right">
               <view class="rec-header">
-                <text class="rec-name">{{item.name}}</text>
                 <text class="rec-score">克制指数: {{item.score}}</text>
               </view>
               <view wx:if="{{item.risks.length > 0}}" class="risk-warning">
@@ -231,6 +231,7 @@
             class="hero-recommendation {{item.score === calculatedCounters.maxScores.damage && calculatedCounters.maxScores.damage > 1 && item.risks.length === 0 ? 'mvp' : ''}}"
           >
             <view class="rec-left">
+              <text class="rec-name">{{item.name}}</text>
               <image
                 class="rec-avatar"
                 src="{{'/images/' + (item.fullEntry.id === 'wrecking-ball' ? 'ball' : item.fullEntry.id === 'soldier-76' ? 'soldier76' : item.fullEntry.id === 'junker-queen' ? 'junkerqueen' : item.fullEntry.id === 'venture' ? '探奇' : item.fullEntry.id === 'hazard' ? '骇灾' : item.fullEntry.id === 'freja' ? '芙蕾雅' : item.fullEntry.id === 'wuyang' ? '无漾' : item.fullEntry.id) + '.png'}}"
@@ -242,7 +243,6 @@
             </view>
             <view class="rec-right">
               <view class="rec-header">
-                <text class="rec-name">{{item.name}}</text>
                 <text class="rec-score">克制指数: {{item.score}}</text>
               </view>
               <view wx:if="{{item.risks.length > 0}}" class="risk-warning">
@@ -294,6 +294,7 @@
             class="hero-recommendation {{item.score === calculatedCounters.maxScores.support && calculatedCounters.maxScores.support > 1 && item.risks.length === 0 ? 'mvp' : ''}}"
           >
             <view class="rec-left">
+              <text class="rec-name">{{item.name}}</text>
               <image
                 class="rec-avatar"
                 src="{{'/images/' + (item.fullEntry.id === 'wrecking-ball' ? 'ball' : item.fullEntry.id === 'soldier-76' ? 'soldier76' : item.fullEntry.id === 'junker-queen' ? 'junkerqueen' : item.fullEntry.id === 'venture' ? '探奇' : item.fullEntry.id === 'hazard' ? '骇灾' : item.fullEntry.id === 'freja' ? '芙蕾雅' : item.fullEntry.id === 'wuyang' ? '无漾' : item.fullEntry.id) + '.png'}}"
@@ -305,7 +306,6 @@
             </view>
             <view class="rec-right">
               <view class="rec-header">
-                <text class="rec-name">{{item.name}}</text>
                 <text class="rec-score">克制指数: {{item.score}}</text>
               </view>
               <view wx:if="{{item.risks.length > 0}}" class="risk-warning">
