@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OW2 战术克制助手 (S19 / 2025 Meta)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { -webkit-tap-highlight-color: transparent; font-family: "Microsoft YaHei", "SimHei", sans-serif; }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: scale(0.98); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fadeIn { animation: fadeIn 0.2s ease-out forwards; }
+        
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(15px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slideUp { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+    <div id="root"></div>
+
+    <script type="module">
+        import React, { useState, useMemo, useEffect } from 'https://esm.sh/react@18.2.0';
+        import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
+        import { Shield, Crosshair, Heart, Swords, Zap, Star, Target, RefreshCw, ChevronRight, Users, X, AlertTriangle, Info, AlertOctagon } from 'https://esm.sh/lucide-react@0.263.1';
+
+        // --- 1. 核心数据配置 (S19 Ultimate) ---
+        const HERO_DATA = {
+          tank: [
+            { id: 'dva', name: 'D.Va', color: '#ed93c7' },
+            { id: 'doomfist', name: '末日铁拳', color: '#813b31' },
+            { id: 'hazard', name: '骇灾', color: '#ff6600' },
+            { id: 'junker-queen', name: '渣客女王', color: '#8ccdf7' },
+            { id: 'mauga', name: '毛加', color: '#e33931' },
+            { id: 'orisa', name: '奥丽莎', color: '#468d43' },
+            { id: 'ramattra', name: '拉玛刹', color: '#6924a7' },
+            { id: 'reinhardt', name: '莱因哈特', color: '#9aa0a6' },
+            { id: 'roadhog', name: '路霸', color: '#b68c52' },
+            { id: 'sigma', name: '西格玛', color: '#9fa8b3' },
+            { id: 'winston', name: '温斯顿', color: '#a2a6bd' },
+            { id: 'wrecking-ball', name: '破坏球', color: '#e79544' },
+            { id: 'zarya', name: '查莉娅', color: '#e77eb7' },
+          ],
+          damage: [
+            { id: 'ashe', name: '艾什', color: '#fff' },
+            { id: 'bastion', name: '堡垒', color: '#7c8f7b' },
+            { id: 'cassidy', name: '卡西迪', color: '#ae5a50' },
+            { id: 'echo', name: '回声', color: '#9ddfd7' },
+            { id: 'freja', name: '芙蕾雅', color: '#3399ff' },
+            { id: 'genji', name: '源氏', color: '#97ef43' },
+            { id: 'hanzo', name: '半藏', color: '#b9b48a' },
+            { id: 'junkrat', name: '狂鼠', color: '#ecbd5d' },
+            { id: 'mei', name: '美', color: '#6cacd8' },
+            { id: 'pharah', name: '法老之鹰', color: '#3e7dca' },
+            { id: 'reaper', name: '死神', color: '#7d3e51' },
+            { id: 'sojourn', name: '索杰恩', color: '#d75447' },
+            { id: 'soldier-76', name: '士兵：76', color: '#697794' },
+            { id: 'sombra', name: '黑影', color: '#74309a' },
+            { id: 'symmetra', name: '秩序之光', color: '#8ebccc' },
+            { id: 'torbjorn', name: '托比昂', color: '#c0726e' },
+            { id: 'tracer', name: '猎空', color: '#d79342' },
+            { id: 'venture', name: '探奇', color: '#eac366' },
+            { id: 'widowmaker', name: '黑百合', color: '#9e6aa8' },
+          ],
+          support: [
+            { id: 'ana', name: '安娜', color: '#718ab3' },
+            { id: 'baptiste', name: '巴蒂斯特', color: '#4eb0b0' },
+            { id: 'brigitte', name: '布里吉塔', color: '#be706e' },
+            { id: 'illari', name: '伊拉里', color: '#e6c964' },
+            { id: 'juno', name: '朱诺', color: '#d15f78' },
+            { id: 'kiriko', name: '雾子', color: '#d34860' },
+            { id: 'lifeweaver', name: '生命之梭', color: '#e096b5' },
+            { id: 'lucio', name: '卢西奥', color: '#85c952' },
+            { id: 'mercy', name: '天使', color: '#e7e6d1' },
+            { id: 'moira', name: '莫伊拉', color: '#803c51' },
+            { id: 'wuyang', name: '无漾', color: '#0ea5e9' },
+            { id: 'zenyatta', name: '禅雅塔', color: '#ede582' },
+          ]
+        };
+
+        // --- 2. 图像源策略 ---
+        const GITHUB_BASE_URL = 'https://raw.githubusercontent.com/bibigod/ow_test/main';
+        const FILENAME_MAP = {
+          'wrecking-ball': 'ball',
+          'soldier-76': 'soldier76',
+          'junker-queen': 'junkerqueen',
+          'venture': '探奇',  
+          'hazard': '骇灾',   
+          'freja': '芙蕾雅',  
+          'wuyang': '无漾'    
+        };
+
+        const getHeroImageUrl = (heroId) => {
+          const filename = FILENAME_MAP[heroId] || heroId;
+          return `${GITHUB_BASE_URL}/${filename}.png`;
+        };
+
+        // --- 3. 关键词高亮 ---
+        const highlightKeywords = (text) => {
+          const keywords = [
+            // 坦克
+            "防御矩阵", "微型导弹", "自毁", "机甲", 
+            "火箭重拳", "格挡", "毁天灭地", 
+            "锯齿壁垒", "刺盾", "猛烈跳跃", "暴雨", "插针",
+            "命令怒吼", "创伤", "禁疗", "流血",
+            "加特林", "起搏器", "暴击", "吸血", "过载",
+            "标枪", "金身", "强固", "标枪旋击",
+            "虚空屏障", "复仇形态", "吞噬漩涡",
+            "屏障", "冲锋", "裂地猛击", 
+            "钩子", "呼吸器", "陷阱", "鸡飞狗跳",
+            "动能俘获", "引力乱流", "护盾", 
+            "特斯拉炮", "罩子", "原始暴怒", "电疗",
+            "工程抓钩", "打桩机", "地雷",
+            "粒子炮", "投射屏障", "重力喷涌", "高能", "副盾",
+            // 输出
+            "延时雷管", "鲍勃", 
+            "强袭模式", 
+            "妨碍手雷", "午时已到",
+            "聚焦光束", "粘性炸弹", "人格复制",
+            "破甲射击", "赛博重斧", "爆裂箭",
+            "反弹", "龙刃", 
+            "音波箭", "风暴箭", 
+            "榴弹", "震荡地雷", 
+            "冰霜喷射", "冰墙", "暴雪",
+            "火箭弹幕", "空战",
+            "幽灵形态", "死亡绽放",
+            "电磁炮", "干扰弹", 
+            "战术目镜", 
+            "黑客入侵", "隐身", "病毒", "EMP",
+            "光子发射器", "哨戒炮", 
+            "炮台", "熔火核心",
+            "脉冲炸弹", "回溯",
+            "钻头", "钻地", 
+            "黑百合之吻", "红外侦测",
+            // 辅助
+            "睡眠针", "生物手雷", "瓶子",
+            "维生力场", "增幅矩阵",
+            "盾击", "集结号令",
+            "治疗塔", "日出",
+            "轨道射线", "加速圆环",
+            "铃铛", "狐狸",
+            "花瓣平台", "生命之树", "拉人",
+            "音障", "滑墙",
+            "蓝线", "复活", "女武神",
+            "生化球", "消散",
+            "潮汐爆破", "激流勇进", "玄武法杖", "守护之浪", // Wuyang
+            "易伤", "圣", "踢", "乱"
+          ];
+          let highlightedText = text;
+          keywords.forEach(keyword => {
+            const regex = new RegExp(`(?<!>)${keyword}(?!<)`, 'g');
+            highlightedText = highlightedText.replace(regex, `<strong class="text-indigo-600 font-black mx-0.5">${keyword}</strong>`);
+          });
+          return React.createElement('span', { dangerouslySetInnerHTML: { __html: highlightedText } });
+        };
+
+        // --- 4. 深度克制逻辑库 (S19 - Expanded) ---
+        const LOGIC_ID_MAP = {
+          'dva': 'dva', 'doomfist': 'doomfist', 'hazard': 'hazard', 'junker-queen': 'junker-queen', 'mauga': 'mauga', 'orisa': 'orisa', 'ramattra': 'ramattra', 'reinhardt': 'reinhardt', 'roadhog': 'roadhog', 'sigma': 'sigma', 'winston': 'winston', 'wrecking-ball': 'wrecking-ball', 'zarya': 'zarya',
+          'ashe': 'ashe', 'bastion': 'bastion', 'cassidy': 'cassidy', 'echo': 'echo', 'freja': 'freja', 'genji': 'genji', 'hanzo': 'hanzo', 'junkrat': 'junkrat', 'mei': 'mei', 'pharah': 'pharah', 'reaper': 'reaper', 'sojourn': 'sojourn', 'soldier-76': 'soldier-76', 'sombra': 'sombra', 'symmetra': 'symmetra', 'torbjorn': 'torbjorn', 'tracer': 'tracer', 'venture': 'venture', 'widowmaker': 'widowmaker',
+          'ana': 'ana', 'baptiste': 'baptiste', 'brigitte': 'brigitte', 'illari': 'illari', 'juno': 'juno', 'kiriko': 'kiriko', 'lifeweaver': 'lifeweaver', 'lucio': 'lucio', 'mercy': 'mercy', 'moira': 'moira', 'wuyang': 'wuyang', 'zenyatta': 'zenyatta'
+        };
+
+        const COUNTER_LOGIC = {
+          // === TANKS ===
+          'hazard': { 
+            tank: [
+                { name: '奥丽莎', reason: '金身（强固）可以无视骇灾的核心控制技能（击退与刺盾减速），且标枪旋击能有效推开试图跳跃进场分割阵地的骇灾。' }, 
+                { name: '西格玛', reason: '骇灾的远程消耗依赖投射物，这会被西格玛的动能俘获完全吸收。此外，西格玛的大招引力乱流可以直接无视骇灾的地面屏障。' },
+                { name: '毛加', reason: '骇灾巨大的模型是毛加触发被动暴击和回血的完美靶子，骇灾的屏障很难在毛加的双加特林下坚持太久。' }
+            ],
+            damage: [
+                { name: '法老之鹰', reason: '骇灾极其缺乏对空手段，其大招暴雨也无法攻击空中单位。法老之鹰可以在其头顶安全输出，迫使其放弃阵地。' }, 
+                { name: '死神', reason: '骇灾虽然有屏障，但体型巨大且机动性依赖长CD的跳跃。死神可以利用传送绕过屏障，近身爆发能瞬间融化骇灾。' },
+                { name: '回声', reason: '空中优势完全压制地面近战坦克，聚焦光束对依赖护甲的骇灾造成巨额伤害。' },
+                { name: '堡垒', reason: '强袭模式的高DPS能迅速击碎骇灾的屏障，使其暴露在火力之下。' }
+            ],
+            support: [
+                { name: '安娜', reason: '骇灾的进场动作幅度大，是睡眠针的绝佳目标。一旦被睡并在敌阵中吃下生物手雷（禁疗），骇灾将失去所有生存手段。' }, 
+                { name: '禅雅塔', reason: '骇灾依赖肉身抗伤和回血，易伤（乱）会使他在屏障破碎后瞬间蒸发，且踢击能防止骇灾贴脸。' }
+            ]
+          },
+          'wuyang': { // S18 New Support
+            tank: [
+                { name: 'D.Va', reason: '无漾的主要治疗手段（玄武法杖）和伤害均为投射物，会被防御矩阵完全吞噬。D.Va的机动性也能追击试图利用激流勇进逃生的无漾。' },
+                { name: '西格玛', reason: '动能俘获能吸收无漾的水弹，且屏障能有效切断无漾对前排的治疗链。' },
+                { name: '温斯顿', reason: '罩子能隔绝无漾的治疗波，且电疗能对无漾造成持续压力，迫使其交出位移。' }
+            ],
+            damage: [
+                { name: '黑影', reason: '黑客入侵会直接打断无漾的激流勇进（Shift），使其失去唯一的立体机动性，变成容易击杀的地面目标。' },
+                { name: '黑百合', reason: '无漾属于中距离支援，在远距离对狙中完全处于劣势。黑百合可以在其治疗射程外将其爆头。' },
+                { name: '源氏', reason: '反弹可以有效反制无漾的水弹攻击，且源氏的高机动性让无漾难以命中。' },
+                { name: '猎空', reason: '无漾的投射物弹道较慢，极难命中小体型的猎空。猎空可以轻松绕后骚扰并骗出关键技能。' }
+            ],
+            support: [
+                { name: '安娜', reason: '无漾依赖潮汐爆破（大招）进行瞬间群体抬血。安娜的禁疗瓶能直接让这个防御性大招失效，造成团灭。' },
+                { name: '雾子', reason: '铃铛可以清除无漾可能施加的负面状态（如果有），且雾子比无漾更灵活，爆头伤害更高。' }
+            ]
+          },
+          'freja': { // S16 Anti-Tank DPS
+            tank: [
+                { name: '查莉娅', reason: '芙蕾雅的赛博重斧机制被设计为克制护甲，但查莉娅的投射屏障（气泡）属于护盾，能有效吸收伤害并转化为高能。' },
+                { name: 'D.Va', reason: '防御矩阵能吞噬芙蕾雅的爆裂箭，且D.Va的高机动性可以追击利用滑翔拉扯的芙蕾雅。' },
+                { name: '温斯顿', reason: '屏障能有效阻挡芙蕾雅的爆发伤害，且电疗能持续压制其血线。' }
+            ],
+            damage: [
+                { name: '黑百合', reason: '芙蕾雅射程较短，属于中近距离刺客。在开阔地图，黑百合可以在其有效射程外轻松狙杀。' },
+                { name: '艾什', reason: '艾什的延时雷管能逼迫芙蕾雅交出位移，且开镜点射在距离上占优。' },
+                { name: '卡西迪', reason: '妨碍手雷能禁止芙蕾雅的位移技能，使其成为空中的活靶子。' },
+                { name: '法老之鹰', reason: '芙蕾雅主要针对地面坦克，对空能力较弱，难以反制双飞组合。' }
+            ],
+            support: [
+                { name: '安娜', reason: '芙蕾雅需要切入才能打出满额伤害，容易在进场途中被安娜点射或睡眠针命中。' },
+                { name: '巴蒂斯特', reason: '维生力场能防止芙蕾雅的爆发秒杀队友，且巴蒂的火力能对空反制。' }
+            ]
+          },
+          'dva': { 
+            tank: [
+                { name: '查莉娅', reason: '粒子炮无视防御矩阵，且D.Va巨大的碰撞体积是查莉娅完美的充能电池。' }, 
+                { name: '温斯顿', reason: '特斯拉炮无视矩阵，温斯顿的罩子能有效切断D.Va与后排治疗的连接。' },
+                { name: '路霸', reason: '钩子无视矩阵，能将D.Va拉入集火圈，且路霸的近距离爆发D.Va难以完全规避。' }
+            ],
+            damage: [
+                { name: '秩序之光', reason: '光子发射器光束无视矩阵，且能在D.Va贴脸时利用其大模型快速充能。' }, 
+                { name: '美', reason: '冰霜喷射无视矩阵并造成穿透性减速，这让极其依赖机动性的D.Va无法有效拉扯。' },
+                { name: '回声', reason: '聚焦光束对半血机甲有斩杀效果，且矩阵难以全方位覆盖回声的立体攻势。' },
+                { name: '黑影', reason: '黑客入侵能打断矩阵和推进器，使D.Va瞬间变成巨大的充电宝。' }
+            ],
+            support: [
+                { name: '布里吉塔', reason: '流星飞锤和盾击均为物理判定，无视矩阵，有效打断爆发。' }, 
+                { name: '莫伊拉', reason: '腐蚀之球和右键吸取均无视矩阵，能稳定消耗机甲血量。' }
+            ] 
+          },
+          'doomfist': { 
+            tank: [
+                { name: '奥丽莎', reason: '标枪能打断铁拳的格挡充能，金身（强固）则完全免疫铁拳的所有击飞和眩晕控制。' }, 
+                { name: '路霸', reason: '铁拳在格挡时移动缓慢，钩子能强制打断格挡状态，将其拉入集火圈。' },
+                { name: '毛加', reason: '被动技能让他在对抗铁拳的控制时更具韧性，且双枪火力能压制铁拳进场。' }
+            ],
+            damage: [
+                { name: '黑影', reason: '黑客入侵能瞬间废除铁拳赖以生存的所有位移技能，使其成为战场上的活靶子。' }, 
+                { name: '卡西迪', reason: '妨碍手雷能禁止所有位移技能，对于需要进场输出再离场的铁拳来说致命。' },
+                { name: '法老之鹰', reason: '铁拳极难处理空中单位，法鸡可以无压力输出地面。' },
+                { name: '回声', reason: '空中优势让铁拳无法触及，且高爆发能快速压低铁拳血线。' }
+            ],
+            support: [
+                { name: '安娜', reason: '铁拳的格挡无法阻挡睡眠针。由于铁拳必须肉身进场，极易被睡在己方阵地中。' },
+                { name: '禅雅塔', reason: '易伤球让进场的铁拳承受巨额伤害，往往在交出技能前就被融化。' }
+            ] 
+          },
+          'junker-queen': { 
+            tank: [
+                { name: '查莉娅', reason: '投射屏障（副盾）能瞬间清除女王核心的流血和禁疗（大招）效果，废掉女王的爆发。' },
+                { name: '奥丽莎', reason: '金身免疫拉扯和控制，标枪能打断女王的斧头前摇。' }
+            ],
+            damage: [
+                { name: '黑百合', reason: '女王缺乏远程护盾，在开阔地图，黑百合可以在女王吼叫加速距离外将其爆头击杀。' }, 
+                { name: '法老之鹰', reason: '女王没有任何对空手段，只能被动挨打。' },
+                { name: '艾什', reason: '延时雷管能越过掩体消耗，长枪模式在安全距离输出。' },
+                { name: '卡西迪', reason: '妨碍手雷能限制女王的突进，且点射伤害高。' }
+            ],
+            support: [
+                { name: '雾子', reason: '铃铛是女王终极技能（轰翻天）的完美机制克星，能瞬间群体清除禁疗和流血效果。' }, 
+                { name: '安娜', reason: '生物手雷反制女王的自愈能力，迫使其后退。' }
+            ] 
+          },
+          'mauga': { 
+            tank: [
+                { name: '西格玛', reason: '毛加的加特林会被动能俘获完全吸收并转化为巨额护盾。西格玛的屏障还能切断毛加的吸血连接。' }, 
+                { name: 'D.Va', reason: '防御矩阵能长时间覆盖毛加的开火窗口，阻止其通过造成伤害来回复生命值。' }
+            ],
+            damage: [
+                { name: '死神', reason: '毛加巨大的头部判定是死神的乐园。在近身缠斗中，死神的吸血效率往往能抗住毛加的火力。' },
+                { name: '半藏', reason: '风暴箭配合爆头能瞬间压低血线，且无需近身冒险。' },
+                { name: '堡垒', reason: '强袭模式的DPS高于毛加，且能利用屏障差进行火力压制。' },
+                { name: '黑百合', reason: '超远距离爆头压制，毛加的武器在远距离散布过大无法反击。' }
+            ],
+            support: [
+                { name: '安娜', reason: '毛加是游戏中极其依赖吸血生存的坦克。一个生物手雷（禁疗）就能瞬间切断其生命线。' }, 
+                { name: '禅雅塔', reason: '易伤球挂给毛加，其巨大的体型根本无法规避伤害，瞬间蒸发。' }
+            ] 
+          },
+          'orisa': { 
+            tank: [
+                { name: '查莉娅', reason: '奥丽莎的持续火力会被查莉娅的屏障完美吸收转化为高能，且风扇无法格挡激光。' }, 
+                { name: 'D.Va', reason: '矩阵能吃掉奥丽莎的主要输出，且机动性远强于笨重的奥丽莎。' },
+                { name: '西格玛', reason: '屏障和动能俘获都能有效应对奥丽莎的输出。' }
+            ],
+            damage: [
+                { name: '黑影', reason: '频繁的黑客入侵能打断标枪旋转和金身循环，使其暴露在火力下。' }, 
+                { name: '回声', reason: '聚焦光束是处理高护甲坦克的利器，且奥丽莎难以对空。' }, 
+                { name: '半藏', reason: '破盾速度快，且大招能逼迫奥丽莎交出金身或位移。' },
+                { name: '堡垒', reason: '火力压制能快速击破奥丽莎的防御技能循环。' }
+            ],
+            support: [
+                { name: '禅雅塔', reason: '奥丽莎模型巨大且移动缓慢，是乱的最优目标，极大降低其坦度。' }, 
+                { name: '巴蒂斯特', reason: '维生力场能抵消奥丽莎大招的斩杀效果，群疗能维持阵线。' }
+            ] 
+          },
+          'ramattra': { 
+            tank: [
+                { name: '路霸', reason: '当拉玛刹开启大招（吞噬漩涡）进场时，路霸的鸡飞狗跳能将其强行推离战场，废掉大招价值。' },
+                { name: '奥丽莎', reason: '标枪旋击能推开开大的拉玛刹，强行拉断大招的吸血连接。' }
+            ],
+            damage: [
+                { name: '法老之鹰', reason: '拉玛刹对空能力几乎为零，只能任由法老之鹰在头顶倾泻火箭弹。' }, 
+                { name: '堡垒', reason: '拉玛刹的屏障是临时性的，堡垒的强袭模式能瞬间融化屏障和复仇形态。' },
+                { name: '猎空', reason: '利用多段位移风筝拉玛刹，使其复仇形态只能无能狂怒。' },
+                { name: '回声', reason: '空中优势，聚焦光束收割。' }
+            ],
+            support: [
+                { name: '安娜', reason: '变身后的拉玛刹模型巨大，极易命中睡眠针。禁疗瓶也能有效针对其格挡时的治疗需求。' }, 
+                { name: '禅雅塔', reason: '易伤球能让拉玛刹在复仇形态下依然脆弱不堪。' }
+            ] 
+          },
+          'reinhardt': { 
+            tank: [
+                { name: '拉玛刹', reason: '拉玛刹复仇形态下的拳击可以直接穿透莱因哈特的屏障造成伤害，大锤无法防御。' },
+                { name: '奥丽莎', reason: '金身免疫冲锋，标枪旋击能将其推离保护位置，标枪打断撞人。' },
+                { name: '路霸', reason: '破盾快，且大招能将大锤推远，使其无法保护队友。' }
+            ],
+            damage: [
+                { name: '堡垒', reason: '拥有游戏中最高的破盾效率。大锤的屏障在强袭模式面前如同虚设。' }, 
+                { name: '狂鼠', reason: '高额的破盾伤害，且震荡地雷可以将大锤炸飞使其露背。' }, 
+                { name: '法老之鹰', reason: '绕过屏障直接打击本体或后排，大锤对此无能为力。' },
+                { name: '黑影', reason: '黑客入侵会让大锤瞬间失去屏障，暴露整个队伍。' }
+            ],
+            support: [
+                { name: '安娜', reason: '一旦大锤尝试攻击或刮火，立刻面临睡针和禁疗的惩罚。' }, 
+                { name: '禅雅塔', reason: '高额破盾伤害，且乱挂能让大锤在举盾间隙瞬间暴毙。' }
+            ] 
+          },
+          'roadhog': { 
+            tank: [
+                { name: '毛加', reason: '毛加在对位中可以把路霸当作无限血包。利用路霸巨大的体型触发暴击回血，路霸很难正面压制。' },
+                { name: '奥丽莎', reason: '标枪能精准打断路霸的呼吸器回血，金身挡钩子。' },
+                { name: 'D.Va', reason: '防御矩阵能吃掉路霸的钩后连招伤害，保护队友。' }
+            ],
+            damage: [
+                { name: '死神', reason: '路霸的大体型让死神散弹枪全额命中，且无法秒杀有幽灵形态的死神。' }, 
+                { name: '索杰恩', reason: '路霸是最好的充能靶子，充能完毕后右键秒杀路霸队友。' }, 
+                { name: '黑影', reason: '黑客入侵打断呼吸器，这是击杀路霸的最关键前置条件。' },
+                { name: '法老之鹰', reason: '在路霸钩子射程外输出，路霸毫无办法。' }
+            ],
+            support: [
+                { name: '安娜', reason: '生物手雷完全废掉路霸的生存核心（呼吸器），使其瞬间融化。' }, 
+                { name: '禅雅塔', reason: '易伤球让本身无护甲无盾的路霸变得脆如薄纸。' }
+            ] 
+          },
+          'sigma': { 
+            tank: [
+                { name: '拉玛刹', reason: '拳击穿透屏障和动能俘获，西格玛对此毫无还手之力。' }, 
+                { name: '温斯顿', reason: '特斯拉炮穿透屏障，且温斯顿可以直接跳过盾骑脸输出。' }, 
+                { name: '查莉娅', reason: '激光武器无法被吸收，且能穿透屏障，完全克制西格玛防御机制。' }
+            ],
+            damage: [
+                { name: '黑影', reason: '黑客入侵会直接打断西格玛的大招（引力乱流），使其坠落。' }, 
+                { name: '秩序之光', reason: '光束在屏障上充能，且无视动能俘获，西格玛无法处理近身三妹。' }, 
+                { name: '源氏', reason: '龙刃和影都可以穿透西格玛的防御机制，近身难以处理。' },
+                { name: '美', reason: '冰霜喷射穿透屏障和俘获，近身冻结西格玛。' }
+            ],
+            support: [
+                { name: '莫伊拉', reason: '大招射线穿透屏障，且西格玛难以吸收到莫伊拉的伤害球。' }, 
+                { name: '卢西奥', reason: '音障能完美抵消引力乱流的砸地伤害（落地前开大）。' }
+            ] 
+          },
+          'winston': { 
+            tank: [
+                { name: '路霸', reason: '散弹枪对猩猩伤害极高，钩子能把跳走的猩猩抓回来集火。' }, 
+                { name: '毛加', reason: '无限弹药的双枪能瞬间击碎罩子并压制温斯顿血量。' }, 
+                { name: 'D.Va', reason: '机动性跟得上猩猩，散弹伤害高，且矩阵能保被跳的辅助。' }
+            ],
+            damage: [
+                { name: '死神', reason: '近战之王，温斯顿跳进来就是给死神送血包和充能。' }, 
+                { name: '堡垒', reason: '强袭模式的高DPS能让罩子像纸一样脆，瞬间蒸发温斯顿。' }, 
+                { name: '托比昂', reason: '炮台自带自瞄能持续压制空中的温斯顿，右键近战爆发极高。' },
+                { name: '黑影', reason: '黑客入侵能打断温斯顿的跳跃，使其被困在敌阵中。' }
+            ],
+            support: [
+                { name: '布里吉塔', reason: '流星飞锤能把空中的温斯顿推远，打断其跳跃节奏和落点。' }, 
+                { name: '安娜', reason: '巨大的体型是睡眠针的好靶子，但需注意罩子阻挡。' }
+            ] 
+          },
+          'wrecking-ball': { 
+            tank: [
+                { name: '路霸', reason: '钩子是破坏球的天敌，能打断其所有动量并将其定身集火。' }, 
+                { name: '奥丽莎', reason: '所有技能都能打断破坏球的动力，使其无法在大招区域内生存。' }, 
+                { name: '末日铁拳', reason: '火箭重拳能打断破坏球的工程抓钩和撞击，使其停滞。' }
+            ],
+            damage: [
+                { name: '黑影', reason: '只要被黑，破坏球就变成了一个没有任何技能的巨型充电宝。' }, 
+                { name: '美', reason: '冰霜减速能让依靠速度生存的破坏球寸步难行。' }, 
+                { name: '卡西迪', reason: '妨碍手雷能禁止其使用抓钩逃生，配合右键爆发带走。' },
+                { name: '堡垒', reason: '强袭模式的高火力能迅速压低破坏球的血量。' }
+            ],
+            support: [
+                { name: '安娜', reason: '睡针非常容易命中高速移动的大球，打断其骚扰节奏。' }, 
+                { name: '布里吉塔', reason: '盾击能打断破坏球的动力铁球模式，保护后排不被撞飞。' }
+            ] 
+          },
+          'zarya': { 
+            tank: [
+                { name: '莱因哈特', reason: '在近身肉搏中，大锤的伤害和血量都优于无能量的毛妹。' }, 
+                { name: '温斯顿', reason: '屏障能切断查莉娅与其治疗的连接，且电疗无视瞄准。' },
+                { name: '拉玛刹', reason: '拳击穿透屏障，且能用屏障阻挡查莉娅的激光。' }
+            ],
+            damage: [
+                { name: '堡垒', reason: '火力过猛，查莉娅的两个盾会在瞬间被打破，容错率极低。' }, 
+                { name: '法老之鹰', reason: '查莉娅缺乏远程手段，法鸡可以在高空安全输出。' }, 
+                { name: '黑百合', reason: '远程狙击让查莉娅不敢露头，且无法积攒能量。' },
+                { name: '黑影', reason: 'EMP能瞬间清除查莉娅的所有蓝盾和屏障。' }
+            ],
+            support: [{ name: '禅雅塔', reason: '易伤球能让查莉娅在交完副盾的真空期瞬间被集火融化。' }] 
+          },
+          'ashe': { 
+            damage: [
+                { name: '黑百合', reason: '在远距离狙击对决中，黑百合的一击必杀优于艾什的点射。' }, 
+                { name: '源氏', reason: '能够格挡艾什的射击，且二段跳难以被瞄准，近身优势大。' }, 
+                { name: '猎空', reason: '艾什难以处理高机动贴脸目标，由于开镜视野受限。' },
+                { name: '索杰恩', reason: '滑铲能快速拉近距离，且爆发伤害不输艾什。' }
+            ],
+            tank: [
+                { name: '温斯顿', reason: '能跳脸追击艾什，且罩子能阻挡艾什的炸药和射击。' }, 
+                { name: 'D.Va', reason: '防御矩阵能吞噬炸药和子弹，机动性足以追杀高台上的艾什。' }
+            ], 
+            support: [{ name: '雾子', reason: '铃铛能清除延时雷管的燃烧Debuff，极大降低艾什的AOE压制力。' }] 
+          },
+          'bastion': { 
+            tank: [
+                { name: '西格玛', reason: '动能俘获可以吃掉堡垒强袭模式的大量伤害转化为高额护盾。' }, 
+                { name: 'D.Va', reason: '矩阵能覆盖堡垒的整个强袭模式持续时间，废掉其爆发期。' },
+                { name: '路霸', reason: '钩子能将堡垒钩出变形状态，或钩入集火圈。' }
+            ],
+            damage: [
+                { name: '半藏', reason: '体型巨大且移动慢，容易吃满半藏的风暴箭和爆头。' }, 
+                { name: '狂鼠', reason: '能在不暴露视野的死角利用榴弹反射攻击笨重的堡垒。' }, 
+                { name: '源氏', reason: '格挡能将堡垒的高额火力全数奉还，瞬间反杀。' },
+                { name: '黑影', reason: '体型大易被黑客入侵，且容易吃满病毒伤害。' }
+            ],
+            support: [
+                { name: '安娜', reason: '巨大的受击判定让睡针几乎必中，有效打断其输出节奏。' }, 
+                { name: '禅雅塔', reason: '易伤球配合队友集火，能让大体型的堡垒瞬间蒸发。' }
+            ] 
+          },
+          'cassidy': { 
+            damage: [
+                { name: '黑百合', reason: '射程远超卡西迪，能在其伤害衰减距离外进行压制。' }, 
+                { name: '艾什', reason: '同样是中远程，艾什的射程和爆发伤害略优于卡西迪。' }, 
+                { name: '半藏', reason: '无衰减的箭矢在远距离对枪中占据绝对优势。' },
+                { name: '士兵：76', reason: '射程更远，且具有持续输出和自疗能力。' }
+            ],
+            tank: [
+                { name: 'D.Va', reason: '矩阵能吃掉午时已到和手雷，且能骑脸压制。' }, 
+                { name: '西格玛', reason: '屏障和动能俘获都能有效应对卡西迪的大招和点射。' }
+            ],
+            support: [{ name: '安娜', reason: '射程优势，且睡针能打断读大招的卡西迪（他那时候移动很慢）。' }] 
+          },
+          'echo': { 
+            damage: [
+                { name: '卡西迪', reason: '作为即时命中英雄，能有效点射空中的回声，手雷限制其乱飞。' }, 
+                { name: '士兵：76', reason: '稳定的持续火力压制，让回声难以在空中长时间停留。' }, 
+                { name: '艾什', reason: '开镜爆头能对脆皮回声造成巨大威胁，迫使其落地。' },
+                { name: '黑百合', reason: '能一枪秒杀在空中飞行的回声。' }
+            ],
+            tank: [{ name: 'D.Va', reason: '能飞天追击回声，矩阵能吃掉粘性炸弹和聚焦光束。' }], 
+            support: [
+                { name: '伊拉里', reason: '长枪判定的攻击能有效消耗空中单位。' }, 
+                { name: '巴蒂斯特', reason: '三连发点射对空能力不俗，维生力场能防回声爆发秒人。' }
+            ] 
+          },
+          'genji': { 
+            tank: [
+                { name: '温斯顿', reason: '电击枪无视格挡，跳跃能跟上源氏的机动性，是源氏一生之敌。' }, 
+                { name: '查莉娅', reason: '激光无视格挡，且源氏难以处理高能毛妹。' }
+            ],
+            damage: [
+                { name: '秩序之光', reason: '哨戒炮减速且光束无视格挡，让源氏极其难受。' }, 
+                { name: '美', reason: '喷射无视格挡并减速，让源氏失去赖以生存的灵活性。' }, 
+                { name: '法老之鹰', reason: '源氏很难处理空中的法鸡，且法鸡的溅射伤害源氏挡不住。' },
+                { name: '回声', reason: '空中优势，且能用光束收割残血源氏。' }
+            ],
+            support: [
+                { name: '莫伊拉', reason: '吸血光束无视格挡，且消散能轻松躲过龙刃斩击。' }, 
+                { name: '布里吉塔', reason: '护盾 bash 能晕眩（如开启大招时）或打断节奏，近战不虚源氏。' }
+            ] 
+          },
+          'hanzo': { 
+            tank: [
+                { name: '温斯顿', reason: '跳脸放罩子能隔绝半藏输出，电疗让其无法安心瞄准。' }, 
+                { name: 'D.Va', reason: '矩阵吃掉箭矢和龙之矢，骑脸压制让半藏难以拉弓。' },
+                { name: '破坏球', reason: '打桩机和高速移动让半藏难以瞄准。' }
+            ],
+            damage: [
+                { name: '源氏', reason: '高机动性让半藏难以瞄准，且反弹能反制随缘箭。' }, 
+                { name: '猎空', reason: '极难命中的小体型目标，一旦空箭就被猎空一梭子带走。' }, 
+                { name: '法老之鹰', reason: '半藏处理空中不规则运动目标非常吃力。' },
+                { name: '黑影', reason: '隐身偷袭能快速秒杀半藏。' }
+            ],
+            support: [{ name: '卢西奥', reason: '加速和滑墙让半藏极其难以预判弹道进行瞄准。' }] 
+          },
+          'junkrat': { 
+            tank: [
+                { name: 'D.Va', reason: '矩阵能吃掉所有榴弹和地雷，废掉狂鼠的爆发。' }, 
+                { name: '西格玛', reason: '动能俘获非常喜欢吃狂鼠的慢速榴弹来刷盾。' }
+            ],
+            damage: [
+                { name: '法老之鹰', reason: '地面克星遇到空中单位基本束手无策，完全无法反击。' }, 
+                { name: '回声', reason: '同理法鸡，空中单位是狂鼠的盲区。' }, 
+                { name: '黑百合', reason: '远距离狙击，狂鼠的抛物线弹道根本摸不到。' },
+                { name: '艾什', reason: '中远距离压制，狂鼠难以近身。' }
+            ],
+            support: [{ name: '巴蒂斯特', reason: '跃击跳高台能规避地面榴弹，维生力场挡轮胎炸。' }] 
+          },
+          'mei': { 
+            tank: [{ name: '奥丽莎', reason: '金身免疫冰冻减速，且能硬吃伤害反打。' }], 
+            damage: [
+                { name: '法老之鹰', reason: '美的主要攻击手段射程有限，无法处理空中单位。' }, 
+                { name: '黑百合', reason: '在美的攻击范围外从容狙击，美没有有效反制手段。' },
+                { name: '回声', reason: '空中单位，美难以处理。' },
+                { name: '半藏', reason: '能一箭爆头秒杀美，且不惧怕近身（有风暴箭）。' }
+            ],
+            support: [{ name: '雾子', reason: '铃铛能瞬间解除冰冻大招效果，完美Counter暴雪。' }] 
+          },
+          'pharah': { 
+            tank: [
+                { name: 'D.Va', reason: '唯一能飞天骑脸的坦克，矩阵能吞噬大招火箭弹幕。' }, 
+                { name: '毛加', reason: '点射精准且能通过燃烧效果压制法鸡血线。' }
+            ],
+            damage: [
+                { name: '艾什', reason: '开镜射击精准且伤害高，是处理双飞组合的常用选择。' }, 
+                { name: '士兵：76', reason: '战术目镜能自动锁定空中的法鸡，且持续火力压制。' }, 
+                { name: '黑百合', reason: '一枪爆头是由于法鸡在空中移动轨迹相对可预判。' }, 
+                { name: '卡西迪', reason: '中距离点射极具威胁，大招能锁定空中的法鸡。' }, 
+                { name: '回声', reason: '空战能力更强，且聚焦光束能收割残血法鸡。' }
+            ],
+            support: [
+                { name: '巴蒂斯特', reason: '长枪判定的三连发，对空输出不亚于C位。' }, 
+                { name: '安娜', reason: '开镜后的即时弹道能有效点杀法鸡。' }, 
+                { name: '伊拉里', reason: '蓄力射击判定大且射程远，对空压制力强。' }
+            ] 
+          },
+          'reaper': { 
+            tank: [{ name: 'D.Va', reason: '矩阵能完全覆盖死神的大招，保护队友不被收割。' }], 
+            damage: [
+                { name: '法老之鹰', reason: '死神只有近距离伤害，对空中的法鸡毫无办法。' }, 
+                { name: '回声', reason: '同理，死神摸不到空中的回声。' }, 
+                { name: '卡西迪', reason: '手雷能限制死神使用幽灵形态逃生，并在远距离点射。' },
+                { name: '韩藏', reason: '能一箭爆头秒杀死神，或探测其传送位置。' }
+            ],
+            support: [{ name: '安娜', reason: '死神开大时移速慢，极易被睡，禁疗能废掉其吸血被动。' }] 
+          },
+          'sojourn': { 
+            tank: [
+                { name: '温斯顿', reason: '屏障能隔绝索杰恩的充能和磁轨炮射击。' }, 
+                { name: 'D.Va', reason: '矩阵能精准吃掉索杰恩秒人的右键磁轨炮。' }, 
+                { name: '西格玛', reason: '盾能阻挡射击，且动能俘获能吃掉其干扰弹。' }
+            ],
+            damage: [
+                { name: '黑百合', reason: '在超远距离对狙中，黑百合的即时命中更有优势。' }, 
+                { name: '源氏', reason: '难以被磁轨炮命中，且反弹能反制其高爆发。' }, 
+                { name: '黑影', reason: '隐身贴脸能打乱索杰恩的输出节奏，干扰其蓄力。' },
+                { name: '猎空', reason: '索杰恩难以命中高机动的猎空。' }
+            ],
+            support: [
+                { name: '卢西奥', reason: '加速让队友更难被磁轨炮爆头，音障防大招。' }, 
+                { name: '雾子', reason: '同样具有高爆发爆头能力，且体型小极难被命中。' }
+            ] 
+          },
+          'soldier-76': { 
+            tank: [
+                { name: 'D.Va', reason: '矩阵能吃掉战术目镜的所有子弹，包括螺旋飞弹。' }, 
+                { name: '西格玛', reason: '举盾能轻松挡住76的持续输出和大招。' },
+                { name: '路霸', reason: '钩子能中断76的跑路和奶棒回血节奏。' }
+            ],
+            damage: [
+                { name: '黑百合', reason: '爆发伤害优于持续伤害，76露头即由被秒风险。' }, 
+                { name: '半藏', reason: '随缘爆头能秒杀正在跑路或输出的76。' }, 
+                { name: '源氏', reason: '反弹能针对战术目镜，且近身爆发高于76。' },
+                { name: '卡西迪', reason: '近距离爆发高于76，且手雷能打断其节奏。' }
+            ],
+            support: [{ name: '安娜', reason: '远距离点射不虚76，且奶瓶能抬起被76压血线的队友。' }] 
+          },
+          'sombra': { 
+            tank: [
+                { name: '温斯顿', reason: '特斯拉炮不需要瞄准，极易抓出隐身中的黑影。' }, 
+                { name: 'D.Va', reason: '无限弹药的聚变机炮可以随时扫射检查隐身黑影。' }
+            ],
+            damage: [
+                { name: '托比昂', reason: '炮台能自动锁定显形的黑影，充当反绕后警报器。' }, 
+                { name: '半藏', reason: '音波箭能探测隐身，防止黑影绕后偷人。' }, 
+                { name: '美', reason: '左键喷射能轻松抓出隐身，且冰墙能挡住黑影退路。' }, 
+                { name: '卡西迪', reason: '专门克制绕后狗，手雷能废掉黑影的传送。' }
+            ],
+            support: [
+                { name: '布里吉塔', reason: '举盾360度观察，飞锤能打出隐身，专门保后排。' }, 
+                { name: '莫伊拉', reason: '吸血不需要精确瞄准，且伤害球能把黑影烫出来。' }, 
+                { name: '雾子', reason: '铃铛能清除病毒效果，且瞬步能支援被黑的队友。' }
+            ] 
+          },
+          'symmetra': { 
+            tank: [{ name: '温斯顿', reason: '电疗能瞬间清除一片区域的所有哨戒炮。' }], 
+            damage: [
+                { name: '法老之鹰', reason: '秩序之光手短且依赖地形，完全无法处理空军。' }, 
+                { name: '狂鼠', reason: 'AOE伤害能顺带清理摄像头，且近身爆发高于三妹。' },
+                { name: '黑百合', reason: '远距离狙杀，三妹无法反制。' },
+                { name: '半藏', reason: '同理，远程压制。' }
+            ],
+            support: [{ name: '莫伊拉', reason: '右键吸附容易清理高处的摄像头，且消散能躲避光束。' }] 
+          },
+          'torbjorn': { 
+            tank: [{ name: '西格玛', reason: '屏障能隔绝炮台火力，让队友安全拆除。' }], 
+            damage: [
+                { name: '法老之鹰', reason: '能在炮台射程外或死角安全无伤拆塔。' }, 
+                { name: '狂鼠', reason: '利用地形反弹榴弹，不用露头就能拆掉炮台。' }, 
+                { name: '黑百合', reason: '超远距离一枪拆炮台，托比昂本体也是活靶子。' }, 
+                { name: '半藏', reason: '同理，远程拆塔能力强，且大招能清场。' }
+            ],
+            support: [{ name: '安娜', reason: '能在超远距离点掉炮台，不让其干扰队友。' }] 
+          },
+          'tracer': { 
+            tank: [
+                { name: '温斯顿', reason: '自动瞄准的电疗让猎空难以利用身法规避伤害。' }, 
+                { name: 'D.Va', reason: '不需要换弹，可以一直扫射压制猎空的走位。' }
+            ],
+            damage: [
+                { name: '托比昂', reason: '炮台是猎空永远的痛，极大限制其绕后活动空间。' }, 
+                { name: '卡西迪', reason: '不管是爆头还是手雷，对175血的猎空都是致命威胁。' }, 
+                { name: '索杰恩', reason: '右键电磁炮充能完毕后有一击必杀猎空的能力。' },
+                { name: '美', reason: '爆头一枪即死，减速虽然难挂但挂上就死。' }
+            ],
+            support: [
+                { name: '伊拉里', reason: '治疗塔能抵消猎空骚扰，蓄力爆头能秒杀猎空。' }, 
+                { name: '布里吉塔', reason: '猎空最怕的辅助，近战连招能瞬间打残猎空。' }, 
+                { name: '雾子', reason: '一发爆头就能带走猎空，且瞬步能逃离脉冲炸弹。' }
+            ] 
+          },
+          'venture': { 
+            tank: [
+                { name: '奥丽莎', reason: '多重控制链（标枪、大招）能让需要进场肉搏的探奇有去无回。' }, 
+                { name: '路霸', reason: '探奇钻地出来的一瞬间容易被钩，且身板脆怕集火。' }
+            ],
+            damage: [
+                { name: '法老之鹰', reason: '探奇作为地下单位，根本摸不到天上的法鸡。' }, 
+                { name: '回声', reason: '同理，空中优势让探奇的主武器和钻地毫无用处。' }, 
+                { name: '卡西迪', reason: '妨碍手雷能禁止钻地和冲刺，让探奇变成活靶子。' },
+                { name: '美', reason: '冰墙能阻挡探奇的钻地突进路径。' }
+            ],
+            support: [{ name: '安娜', reason: '探奇模型判定较大且需近身，极易吃睡针和瓶子。' }] 
+          },
+          'widowmaker': { 
+            tank: [
+                { name: '温斯顿', reason: '跳跃进场放罩子，能直接废掉黑百合的输出环境。' }, 
+                { name: '破坏球', reason: '超高机动性滚脸，加上打桩机，黑百合根本站不住。' }, 
+                { name: 'D.Va', reason: '飞脸骑射加矩阵，黑百合甚至没有逃跑的机会。' }
+            ],
+            damage: [
+                { name: '黑影', reason: '隐身摸到身后，黑百合开镜时视野窄，极易被偷袭秒杀。' }, 
+                { name: '源氏', reason: '高机动性难以瞄准，且有反弹作为保命和反杀手段。' }, 
+                { name: '猎空', reason: '多段位移贴脸，黑百合近战很难处理高频骚扰。' }, 
+                { name: '索杰恩', reason: '滑铲跳跃能快速拉近距离，且小身位难以被狙击。' }
+            ],
+            support: [
+                { name: '雾子', reason: '由于黑百合站桩不动，很容易被雾子远距离两发飞镖爆头。' }, 
+                { name: '卢西奥', reason: '高机动性骑脸输出，黑百合很难瞄准滑墙DJ。' }
+            ] 
+          },
+          'ana': { 
+            tank: [
+                { name: 'D.Va', reason: '矩阵能吃掉关键的毒奶瓶和睡眠针，保住被集火队友。' }, 
+                { name: '温斯顿', reason: '罩子能切断安娜的奶线，且跳脸让安娜难以生存。' }, 
+                { name: '西格玛', reason: '屏障能隔绝安娜对前排的治疗，动能俘获吃技能。' }
+            ],
+            damage: [
+                { name: '猎空', reason: '小体型高机动，安娜极难睡中，且容易被一梭子带走。' }, 
+                { name: '源氏', reason: '反弹能骗出关键技能，龙刃是无位移安娜的噩梦。' }, 
+                { name: '黑影', reason: '病毒+黑枪能快速秒杀安娜，安娜交瓶子也难活。' },
+                { name: '回声', reason: '爆发高，安娜难以应对空中突袭。' }
+            ],
+            support: [{ name: '雾子', reason: '铃铛能瞬间清除禁疗和睡眠效果，完美反制安娜机制。' }] 
+          },
+          'baptiste': { 
+            tank: [
+                { name: '路霸', reason: '钩子能把人从维生力场里拉出来，或者强制位移。' },
+                { name: '温斯顿', reason: '跳脸逼出维生力场，且罩子能隔绝治疗。' }
+            ], 
+            damage: [
+                { name: '黑影', reason: 'EMP能直接摧毁维生力场和增幅矩阵，废掉巴蒂大招。' }, 
+                { name: '源氏', reason: '高机动性近身缠斗，巴蒂难以利用榴弹AOE反击。' },
+                { name: '回声', reason: '粘性炸弹能迫使巴蒂交出力场。' }
+            ], 
+            support: [{ name: '安娜', reason: '禁疗瓶能让维生力场里的残血敌人无法抬血，力场一破即死。' }] 
+          },
+          'brigitte': { 
+            tank: [
+                { name: '拉玛刹', reason: '拳击无视护盾，锤妹举盾也挡不住拉玛刹的爆发。' }, 
+                { name: '莱因哈特', reason: '大锤的平A伤害和血量都碾压锤妹，且冲锋秒杀。' },
+                { name: '路霸', reason: '钩子破盾，一枪秒杀。' }
+            ],
+            damage: [
+                { name: '法老之鹰', reason: 'AOE伤害绕过小盾，锤妹手短只能被动挨打。' }, 
+                { name: '狂鼠', reason: '极高的破盾效率，榴弹能炸到盾后的锤妹。' }, 
+                { name: '堡垒', reason: '任何盾在堡垒面前都是纸，锤妹瞬间失去生存屏障。' },
+                { name: '回声', reason: '空中爆发，粘性炸弹秒杀。' }
+            ],
+            support: [{ name: '安娜', reason: '禁疗瓶能废掉锤妹的被动回血，使其不敢上前触发鼓舞。' }] 
+          },
+          'illari': { 
+            tank: [
+                { name: 'D.Va', reason: '矩阵能吞噬伊拉里的大招核心，使其完全无效化。' }, 
+                { name: '西格玛', reason: '同理，动能俘获和盾都能处理伊拉里的大招。' },
+                { name: '温斯顿', reason: '跳脸能同时压制伊拉里和治疗塔。' }
+            ],
+            damage: [
+                { name: '源氏', reason: '反弹能将伊拉里的高伤子弹弹回，且能拆治疗塔。' }, 
+                { name: '黑影', reason: '病毒配合黑枪秒杀能力强，且能黑掉治疗塔断奶。' },
+                { name: '士兵：76', reason: '远距离拆塔，且持续输出高于伊拉里。' }
+            ],
+            support: [{ name: '安娜', reason: '禁疗能阻断治疗塔的效果，大招也能被睡针打断。' }] 
+          },
+          'juno': { 
+            tank: [
+                { name: 'D.Va', reason: '朱诺依赖机动性，D.Va能全程追击并用矩阵吃掉其火力。' }, 
+                { name: '温斯顿', reason: '跳脸电疗，朱诺的加速在猩猩的追踪下依然难逃。' }
+            ],
+            damage: [
+                { name: '卡西迪', reason: '战术锁定（大招）是朱诺这种空中滑翔目标的克星。' }, 
+                { name: '黑百合', reason: '朱诺浮空时轨迹相对平滑，是狙击手的活靶子。' }, 
+                { name: '士兵：76', reason: '战术目镜能稳定锁定并击杀在空中乱飞的朱诺。' },
+                { name: '艾什', reason: '爆头威胁大，且雷管能造成压力。' }
+            ],
+            support: [{ name: '安娜', reason: '朱诺模型较大，容易吃睡针，且开镜点射能造成威胁。' }] 
+          },
+          'kiriko': { 
+            tank: [
+                { name: '温斯顿', reason: '罩子能隔绝雾子的治疗符，迫使雾子交瞬步进场挨打。' },
+                { name: '末日铁拳', reason: '高机动性追击，控制技能逼出瞬步。' }
+            ], 
+            damage: [
+                { name: '法老之鹰', reason: '雾子的飞镖很难命中高空目标，只能被动挨炸。' }, 
+                { name: '源氏', reason: '二段跳让雾子难以爆头，且源氏近战爆发高于雾子。' }, 
+                { name: '卡西迪', reason: '逼出瞬步后，手雷能有效限制雾子的再次走位。' },
+                { name: '黑影', reason: '黑客入侵打断瞬步，使其无法逃生。' }
+            ],
+            support: [{ name: '安娜', reason: '虽然铃铛解禁疗，但安娜可以用瓶子逼出铃铛，随后队友接大招。' }] 
+          },
+          'lifeweaver': { 
+            tank: [{ name: '拉玛刹', reason: '拳击能打到花瓣平台上方，且大招能覆盖平台高度。' }], 
+            damage: [
+                { name: '黑影', reason: 'EMP能瞬间摧毁生命之树（大招），且能打断花瓣上升。' }, 
+                { name: '法老之鹰', reason: '花瓣平台上的花男就像盘子里的菜，无处可躲。' },
+                { name: '回声', reason: '空中单位无视花瓣平台的高度优势。' }
+            ],
+            support: [{ name: '安娜', reason: '禁疗能让生命之树的瞬间抬血变成无效治疗。' }] 
+          },
+          'lucio': { 
+            tank: [
+                { name: '路霸', reason: '钩子能制裁花里胡哨的滑墙，拉过来就是一枪带走。' }, 
+                { name: '温斯顿', reason: '电疗不需要瞄准，专门治多动症DJ。' }
+            ],
+            damage: [
+                { name: '卡西迪', reason: '妨碍手雷能让DJ瞬间减速，变成地面活靶子。' }, 
+                { name: '托比昂', reason: '炮台自动锁定，让DJ无法随心所欲地挂墙骚扰。' }, 
+                { name: '莫伊拉', reason: '吸血光束无需精确瞄准，能稳定消耗DJ血量。' },
+                { name: '士兵：76', reason: '战术目镜自动锁定高机动目标。' }
+            ],
+            support: [{ name: '莫伊拉', reason: '同理，稳定的软锁伤害是高机动低血量英雄的克星。' }] 
+          },
+          'mercy': { 
+            tank: [
+                { name: '温斯顿', reason: '持续追击天使，迫使其不断交shift，直到无路可飞。' }, 
+                { name: 'D.Va', reason: '高机动性追杀残血天使，矩阵能吃掉天使掏出的手枪。' }
+            ],
+            damage: [
+                { name: '士兵：76', reason: '大招战术目镜是女武神（天使大招）的绝对克星。' }, 
+                { name: '卡西迪', reason: '午时已到能锁定飞在天上的天使，将其击落。' }, 
+                { name: '黑百合', reason: '一枪爆头，特别是针对复活僵直期间的天使。' },
+                { name: '黑影', reason: '黑客入侵打断守护天使飞行，使其坠落。' }
+            ],
+            support: [{ name: '安娜', reason: '禁疗能让天使的黄线毫无作用，只能眼看队友阵亡。' }] 
+          },
+          'moira': { 
+            tank: [{ name: 'D.Va', reason: '矩阵能吃掉莫伊拉所有的生化球（伤害和治疗）。' }], 
+            damage: [
+                { name: '黑百合', reason: '莫伊拉手短摸不到远处的狙，只能被动挨打。' }, 
+                { name: '半藏', reason: '高爆发伤害能在莫伊拉吸死自己之前将其秒杀。' },
+                { name: '法老之鹰', reason: '莫伊拉无法攻击高空单位。' }
+            ],
+            support: [{ name: '安娜', reason: '禁疗瓶能废掉莫伊拉的强力群奶和大招回血效果。' }] 
+          },
+          'zenyatta': { 
+            tank: [
+                { name: '温斯顿', reason: '跳脸放罩子，禅雅塔这种没位移的英雄必死无疑。' }, 
+                { name: 'D.Va', reason: '微型导弹配合冲撞能瞬间秒杀模型像正方形的禅雅塔。' }
+            ],
+            damage: [
+                { name: '黑影', reason: 'EMP能直接削减禅雅塔绝大部分血量（蓝盾），随后一枪带走。' }, 
+                { name: '猎空', reason: '禅雅塔模型宽大，极易吃满猎空一梭子，且无保命技能。' }, 
+                { name: '黑百合', reason: '由于禅雅塔模型头大且移动慢，是狙击手的最爱。' },
+                { name: '源氏', reason: '经典克制，高爆发近身秒杀。' }
+            ],
+            support: [{ name: '安娜', reason: '禁疗能让禅雅塔在开“圣”期间队友依然无法回血死亡。' }] 
+          }
+        };
+
+        // 辅助函数：通过名称反查 Hero 对象
+        const findHeroByName = (name) => {
+          if (!name) return null;
+          const allHeroes = [...HERO_DATA.tank, ...HERO_DATA.damage, ...HERO_DATA.support];
+          let hero = allHeroes.find(h => h.name === name);
+          if (!hero) {
+            hero = allHeroes.find(h => name.includes(h.name) || h.name.includes(name));
+          }
+          return hero;
+        };
+
+        // --- 5. UI 组件 ---
+        const HeroAvatar = ({ hero, isSelected, size = "normal", isTarget = false, showName = true }) => {
+          const [imgError, setImgError] = useState(false);
+          useEffect(() => { setImgError(false); }, [hero.id]);
+
+          if (!hero) return null;
+
+          const sizeClasses = {
+            tiny: "w-6 h-6 rounded-[4px]",
+            small: "w-9 h-9",
+            normal: "w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16",
+            large: "w-16 h-16 sm:w-20 sm:h-20"
+          }[size];
+
+          const imageUrl = getHeroImageUrl(hero.id);
+          const showFallback = !imageUrl || imgError;
+          const heroCode = hero.id.substring(0, 1).toUpperCase();
+          const heroCodeFull = hero.id.split('-').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+
+          return React.createElement('div', { className: `relative flex flex-col items-center group ${size === 'normal' ? 'w-16 sm:w-20' : ''}` },
+            React.createElement('div', { className: `relative ${sizeClasses} flex-shrink-0 select-none ${size === 'tiny' ? '' : 'skew-x-0'}` },
+              // 选中状态：虚线边框 + 淡蓝背景
+              React.createElement('div', { className: `absolute inset-0 rounded-sm transition-all duration-200 ${size !== 'tiny' && '-skew-x-12'} ${isSelected ? 'border-2 border-dashed border-blue-400 bg-blue-50 z-10' : 'bg-white border border-slate-200 group-hover:border-slate-400 shadow-sm'} ${isTarget ? 'ring-1 ring-red-500/50' : ''}` }),
+              
+              React.createElement('div', { className: `absolute inset-[2px] overflow-hidden rounded-sm flex items-center justify-center ${size !== 'tiny' && '-skew-x-12'} ${isSelected ? 'bg-blue-50' : 'bg-slate-100'}`, style: { backgroundColor: showFallback && !isSelected ? hero.color : undefined } },
+                !showFallback 
+                  ? React.createElement('img', { src: imageUrl, alt: hero.name, className: `w-full h-full object-cover transition-transform duration-300 ${size !== 'tiny' ? 'scale-[1.2] skew-x-12 hover:scale-[1.3]' : ''} ${isSelected ? 'opacity-50 grayscale' : ''}`, onError: () => setImgError(true), loading: "lazy" })
+                  : React.createElement('div', { className: `w-full h-full relative flex items-center justify-center overflow-hidden ${size !== 'tiny' ? 'skew-x-12' : ''}` },
+                      React.createElement('div', { className: "absolute inset-0 bg-gradient-to-br from-black/10 to-black/30" }),
+                      size !== 'tiny' && React.createElement('span', { className: "absolute -bottom-2 -right-2 text-[40px] font-black text-white/20 leading-none select-none" }, heroCodeFull),
+                      React.createElement('span', { className: `font-black text-white drop-shadow-md z-10 font-mono ${size === 'tiny' ? 'text-[10px]' : 'text-xl sm:text-2xl'} ${isSelected ? 'text-slate-400' : ''}` }, heroCode)
+                    )
+              )
+            ),
+            showName && size === 'normal' && React.createElement('span', { className: "mt-2 text-[10px] font-bold text-slate-600 tracking-wide text-center leading-tight w-full truncate px-1" }, hero.name)
+          );
+        };
+
+        const App = () => {
+          const [selectedEnemies, setSelectedEnemies] = useState([]);
+
+          const handleHeroClick = (hero) => {
+            setSelectedEnemies(prev => {
+              const exists = prev.find(h => h.id === hero.id);
+              if (exists) return prev.filter(h => h.id !== hero.id);
+              if (prev.length >= 6) return prev;
+              return [...prev, hero];
+            });
+          };
+
+          const clearSelection = () => setSelectedEnemies([]);
+
+          const calculatedCounters = useMemo(() => {
+            if (selectedEnemies.length === 0) return null;
+            const scores = { tank: {}, damage: {}, support: {} };
+            
+            // 分列计算最高分
+            const maxScores = { tank: 0, damage: 0, support: 0 };
+
+            selectedEnemies.forEach(enemy => {
+              const enemyLogicId = LOGIC_ID_MAP[enemy.id] || enemy.id;
+              const enemyCounters = COUNTER_LOGIC[enemyLogicId];
+              if (!enemyCounters) return;
+
+              ['tank', 'damage', 'support'].forEach(role => {
+                if (enemyCounters[role]) {
+                  enemyCounters[role].forEach(counter => {
+                    let counterHero = findHeroByName(counter.name);
+                    if (!counterHero) counterHero = { id: 'unknown', name: counter.name, color: '#555' };
+
+                    if (!scores[role][counterHero.name]) {
+                      scores[role][counterHero.name] = { name: counterHero.name, score: 0, matches: [], fullEntry: counterHero, risks: [] };
+                    }
+                    scores[role][counterHero.name].score += 1;
+                    scores[role][counterHero.name].matches.push({ target: enemy, reason: counter.reason });
+                  });
+                }
+              });
+            });
+
+            // Update max scores and analyze risks
+            ['tank', 'damage', 'support'].forEach(role => {
+              Object.values(scores[role]).forEach(heroData => {
+                if (heroData.score > maxScores[role]) maxScores[role] = heroData.score;
+
+                const myLogicId = LOGIC_ID_MAP[heroData.fullEntry.id] || heroData.fullEntry.id;
+                const myCountersList = COUNTER_LOGIC[myLogicId]; 
+
+                if (myCountersList) {
+                    const allMyCounters = [...(myCountersList.tank||[]), ...(myCountersList.damage||[]), ...(myCountersList.support||[])];
+                    selectedEnemies.forEach(enemy => {
+                        if (allMyCounters.some(c => c.name === enemy.name)) {
+                            heroData.risks.push(enemy);
+                        }
+                    });
+                }
+              });
+            });
+
+            const result = { maxScores }; // Return separate max scores
+            ['tank', 'damage', 'support'].forEach(role => {
+              const roleScores = Object.values(scores[role]);
+              roleScores.sort((a, b) => {
+                  if (b.score !== a.score) return b.score - a.score;
+                  if (a.risks.length !== b.risks.length) return a.risks.length - b.risks.length;
+                  return 0;
+              });
+              result[role] = roleScores;
+            });
+            return result;
+          }, [selectedEnemies]);
+
+          const RoleSection = ({ title, icon: Icon, heroes, color }) => {
+            return React.createElement('div', { className: "mb-8" },
+              React.createElement('div', { className: "flex items-center gap-2 mb-3 pl-2 border-l-4", style: { borderColor: color } },
+                React.createElement(Icon, { size: 18, style: { color: color } }),
+                React.createElement('h3', { className: "text-sm font-black italic uppercase tracking-widest text-slate-700" }, title),
+                React.createElement('div', { className: "h-[1px] flex-grow bg-slate-200 ml-4" })
+              ),
+              React.createElement('div', { className: "grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 lg:grid-cols-11 gap-y-6 gap-x-2 px-1" },
+                heroes.map(hero => {
+                  const isSelected = selectedEnemies.some(h => h.id === hero.id);
+                  const isDisabled = !isSelected && selectedEnemies.length >= 6;
+                  return React.createElement('button', {
+                    key: hero.id,
+                    onClick: () => handleHeroClick(hero),
+                    disabled: isDisabled,
+                    className: `flex items-center justify-center outline-none transition-opacity ${isDisabled ? 'opacity-30 grayscale' : 'opacity-100'}`
+                  }, React.createElement(HeroAvatar, { hero: hero, isSelected: isSelected, size: "normal" }));
+                })
+              )
+            );
+          };
+
+          const RecommendationCard = ({ roleName, icon: Icon, data, accentColor, maxScore }) => {
+            const topPicks = data ? data.slice(0, 4) : [];
+            return React.createElement('div', { className: "flex-1 flex flex-col group rounded-lg overflow-hidden border border-slate-200 bg-white shadow-sm min-w-0" },
+              React.createElement('div', { className: "flex items-center gap-3 p-3 border-b relative overflow-hidden", style: { borderColor: accentColor, backgroundColor: `${accentColor}10` } },
+                React.createElement('div', { className: "p-1.5 rounded bg-white text-slate-700 relative z-10 shadow-sm" }, React.createElement(Icon, { size: 16, style: { color: accentColor } })),
+                React.createElement('span', { className: "font-black italic uppercase tracking-wider text-slate-700 z-10 text-sm" }, roleName)
+              ),
+              React.createElement('div', { className: "p-1 flex-1 bg-slate-50" },
+                topPicks.length > 0 ? (
+                  React.createElement('div', { className: "space-y-2 p-1" },
+                    topPicks.map((item, idx) => {
+                      const isMvp = item.score === maxScore && maxScore > 1; // MVP logic updated
+                      return React.createElement('div', { key: idx, className: "relative overflow-hidden rounded border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow" },
+                        isMvp && React.createElement('div', { className: "absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-yellow-400 to-orange-500 z-10" }),
+                        React.createElement('div', { className: `flex items-start gap-3 p-3 transition-colors ${isMvp ? 'bg-orange-50/50' : ''}` },
+                          React.createElement('div', { className: "flex flex-col items-center gap-2 flex-shrink-0" },
+                            React.createElement(HeroAvatar, { hero: item.fullEntry, size: "normal", showName: false }),
+                            isMvp && React.createElement('div', { className: "flex items-center gap-1 bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase leading-none border border-yellow-200" },
+                              React.createElement(Star, { size: 8, fill: "currentColor" }), "MVP"
+                            )
+                          ),
+                          React.createElement('div', { className: "flex-1 min-w-0 flex flex-col" },
+                            React.createElement('div', { className: "flex justify-between items-center mb-2" },
+                              React.createElement('h4', { className: `font-black text-lg leading-none italic uppercase tracking-tight ${isMvp ? 'text-orange-600' : 'text-slate-800'}` }, item.name),
+                              React.createElement('span', { className: "text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200" }, `克制指数: ${item.score}`)
+                            ),
+                            
+                            item.risks.length > 0 && React.createElement('div', { className: "mb-2 flex items-start gap-1.5 bg-red-50 border border-red-100 rounded p-1.5" },
+                                React.createElement(AlertOctagon, { size: 12, className: "text-red-500 mt-0.5 flex-shrink-0" }),
+                                React.createElement('div', { className: "flex flex-wrap gap-1 items-center" },
+                                    React.createElement('span', { className: "text-[10px] font-bold text-red-600" }, "警告：被"),
+                                    item.risks.map((risk, rIdx) => 
+                                        React.createElement('div', { key: rIdx, className: "flex items-center gap-1 bg-white px-1 rounded border border-red-100" },
+                                            React.createElement(HeroAvatar, { hero: risk, size: "tiny" }),
+                                            React.createElement('span', { className: "text-[10px] text-red-800" }, risk.name)
+                                        )
+                                    ),
+                                    React.createElement('span', { className: "text-[10px] font-bold text-red-600" }, "克制")
+                                )
+                            ),
+
+                            React.createElement('div', { className: "space-y-2" },
+                              item.matches.map((match, mIdx) => 
+                                React.createElement('div', { key: mIdx, className: "flex flex-col gap-1 bg-slate-50 rounded p-1.5 border border-slate-100 relative overflow-hidden" },
+                                  React.createElement('div', { className: "flex items-center gap-1.5 mb-1" },
+                                    React.createElement('div', { className: "flex-shrink-0" }, React.createElement(HeroAvatar, { hero: match.target, size: "tiny" })),
+                                    React.createElement('span', { className: "text-[10px] uppercase font-bold text-slate-400 tracking-wider" }, "针对:"),
+                                    React.createElement('span', { className: "text-[11px] font-bold text-slate-700" }, match.target.name)
+                                  ),
+                                  React.createElement('p', { className: "text-[11px] text-slate-500 leading-relaxed border-l-2 border-slate-200 pl-2 ml-0.5" },
+                                    highlightKeywords(match.reason)
+                                  )
+                                )
+                              )
+                            )
+                          )
+                        )
+                      );
+                    })
+                  )
+                ) : (
+                  React.createElement('div', { className: "h-40 flex flex-col items-center justify-center text-slate-400 p-4 gap-2" },
+                    React.createElement('div', { className: "w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center animate-pulse" },
+                      React.createElement(Users, { size: 20, className: "opacity-50 text-slate-500" })
+                    ),
+                    React.createElement('span', { className: "text-xs font-medium uppercase tracking-widest text-center opacity-60" }, "等待战术分析...")
+                  )
+                )
+              )
+            );
+          };
+
+          return React.createElement('div', { className: "min-h-screen bg-[#f8fafc] text-slate-800 font-sans selection:bg-[#f99e1a] selection:text-white pb-20 relative overflow-x-hidden" },
+            React.createElement('div', { className: "fixed inset-0 z-0 pointer-events-none", style: { backgroundImage: `linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px)`, backgroundSize: '40px 40px', maskImage: 'radial-gradient(circle at 50% 20%, black, transparent 70%)' } }),
+            React.createElement('header', { className: "bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-sm" },
+              React.createElement('div', { className: "max-w-7xl mx-auto px-4 h-14 flex justify-between items-center" },
+                React.createElement('div', { className: "flex items-center gap-3" },
+                  React.createElement('div', { className: "bg-[#f99e1a] p-1 rounded skew-x-[-10deg] shadow-sm" }, React.createElement(Swords, { size: 20, className: "text-white skew-x-[10deg]" })),
+                  React.createElement('div', { className: "flex flex-col" },
+                    React.createElement('h1', { className: "font-black italic text-lg md:text-xl uppercase tracking-tighter leading-none text-slate-800" }, "OW2 ", React.createElement('span', { className: "text-[#f99e1a]" }, "克制助手")),
+                    React.createElement('span', { className: "text-[9px] uppercase tracking-[0.1em] text-slate-400 font-bold" }, "S19 / SEASON 2025")
+                  )
+                ),
+                React.createElement('div', { className: "flex items-center gap-4" },
+                  selectedEnemies.length > 0 && React.createElement('button', { onClick: clearSelection, className: "flex items-center gap-1.5 px-3 py-1.5 rounded bg-red-50 hover:bg-red-100 text-red-500 border border-red-200 text-[11px] font-bold transition-all group" },
+                    React.createElement(RefreshCw, { size: 12, className: "group-hover:rotate-180 transition-transform" }), "重置"
+                  )
+                )
+              )
+            ),
+            React.createElement('main', { className: "max-w-7xl mx-auto p-4 md:p-6 relative z-10" },
+              React.createElement('div', { className: "mb-10" },
+                React.createElement('div', { className: "flex items-center justify-between mb-3" },
+                  React.createElement('h2', { className: "text-xs font-bold text-slate-500 flex items-center gap-2" },
+                    React.createElement(Target, { size: 16, className: "text-[#f99e1a]" }), "选择敌方阵容 (最大6人)"
+                  ),
+                  React.createElement('span', { className: `text-xs font-mono font-bold ${selectedEnemies.length === 6 ? 'text-red-500' : 'text-slate-400'}` }, `${selectedEnemies.length} / 6`)
+                ),
+                React.createElement('div', { className: `min-h-[100px] bg-white border border-dashed border-slate-300 rounded-lg flex items-center justify-center gap-4 p-4 transition-all shadow-sm ${selectedEnemies.length > 0 ? 'border-solid border-[#f99e1a]/30 bg-orange-50/30' : ''}` },
+                  selectedEnemies.length === 0 ? (
+                    React.createElement('div', { className: "flex flex-col items-center gap-2 opacity-40" },
+                      React.createElement(Users, { size: 24, className: "text-slate-400" }),
+                      React.createElement('span', { className: "text-xs font-medium text-slate-500" }, "点击下方英雄图标构建敌方阵容")
+                    )
+                  ) : (
+                    React.createElement('div', { className: "flex flex-wrap justify-center gap-6 animate-fadeIn" },
+                      selectedEnemies.map(enemy => (
+                        React.createElement('div', { key: enemy.id, className: "relative group cursor-pointer", onClick: () => handleHeroClick(enemy) },
+                          React.createElement(HeroAvatar, { hero: enemy, size: "normal", showName: false }),
+                          React.createElement('div', { className: "absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 shadow-lg opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 transition-all z-20 border border-white" },
+                            React.createElement(X, { size: 10 })
+                          )
+                        )
+                      ))
+                    )
+                  )
+                )
+              ),
+              calculatedCounters && React.createElement('div', { className: "mb-12 animate-slideUp" },
+                React.createElement('div', { className: "flex items-center gap-3 mb-5" },
+                  React.createElement('div', { className: "w-1 h-6 bg-[#00d4ff]" }),
+                  React.createElement('div', { className: "flex flex-col" },
+                    React.createElement('h2', { className: "text-xl font-black italic text-slate-800 tracking-tight leading-none" }, "战术 ", React.createElement('span', { className: "text-[#00d4ff]" }, "分析"))
+                  )
+                ),
+                React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-3 gap-4" },
+                  React.createElement(RecommendationCard, { roleName: "重装", icon: Shield, data: calculatedCounters.tank, accentColor: "#00d4ff", maxScore: calculatedCounters.maxScores.tank }),
+                  React.createElement(RecommendationCard, { roleName: "输出", icon: Crosshair, data: calculatedCounters.damage, accentColor: "#ef4444", maxScore: calculatedCounters.maxScores.damage }),
+                  React.createElement(RecommendationCard, { roleName: "支援", icon: Heart, data: calculatedCounters.support, accentColor: "#22c55e", maxScore: calculatedCounters.maxScores.support })
+                )
+              ),
+              React.createElement('div', { className: "space-y-4" },
+                React.createElement(RoleSection, { title: "重装 (Tank)", icon: Shield, heroes: HERO_DATA.tank, color: "#00d4ff" }),
+                React.createElement(RoleSection, { title: "输出 (Damage)", icon: Crosshair, heroes: HERO_DATA.damage, color: "#ef4444" }),
+                React.createElement(RoleSection, { title: "支援 (Support)", icon: Heart, heroes: HERO_DATA.support, color: "#22c55e" })
+              ),
+              React.createElement('div', { className: "mt-12 border-t border-slate-200 pt-6 flex justify-center" },
+                React.createElement('div', { className: "flex items-center gap-2 px-4 py-2 rounded bg-blue-50 border border-blue-100 text-blue-600 text-[11px]" },
+                  React.createElement(Info, { size: 14 }),
+                  React.createElement('span', {}, "数据基于最新赛季版本优化 (S19 Updated)。包含新英雄 Hazard。")
+                )
+              )
+            )
+          );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(React.createElement(App));
+    </script>
+</body>
+</html>
