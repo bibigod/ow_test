@@ -237,7 +237,7 @@
         <view
           wx:for="{{tankHeroes}}"
           wx:key="id"
-          class="hero-item {{selectedEnemies.length >= 6 && !isSelected(item.id) ? 'disabled' : ''}} {{selectedEnemies.some(function(h) { return h.id === item.id; }) ? 'selected' : ''}}"
+          class="hero-item {{item.isDisabled ? 'disabled' : ''}} {{item.isSelected ? 'selected' : ''}}"
           bindtap="onHeroTap"
           data-hero="{{item}}"
         >
@@ -265,7 +265,7 @@
         <view
           wx:for="{{damageHeroes}}"
           wx:key="id"
-          class="hero-item {{selectedEnemies.length >= 6 && !isSelected(item.id) ? 'disabled' : ''}} {{selectedEnemies.some(function(h) { return h.id === item.id; }) ? 'selected' : ''}}"
+          class="hero-item {{item.isDisabled ? 'disabled' : ''}} {{item.isSelected ? 'selected' : ''}}"
           bindtap="onHeroTap"
           data-hero="{{item}}"
         >
@@ -293,7 +293,7 @@
         <view
           wx:for="{{supportHeroes}}"
           wx:key="id"
-          class="hero-item {{selectedEnemies.length >= 6 && !isSelected(item.id) ? 'disabled' : ''}} {{selectedEnemies.some(function(h) { return h.id === item.id; }) ? 'selected' : ''}}"
+          class="hero-item {{item.isDisabled ? 'disabled' : ''}} {{item.isSelected ? 'selected' : ''}}"
           bindtap="onHeroTap"
           data-hero="{{item}}"
         >
