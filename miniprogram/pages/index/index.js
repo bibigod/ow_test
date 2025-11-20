@@ -3,16 +3,42 @@ const { HERO_DATA, COUNTER_LOGIC, getHeroImagePath, findHeroByName, KEYWORDS } =
 
 Page({
   data: {
-    tankHeroes: HERO_DATA.tank,
-    damageHeroes: HERO_DATA.damage,
-    supportHeroes: HERO_DATA.support,
+    tankHeroes: [],
+    damageHeroes: [],
+    supportHeroes: [],
     selectedEnemies: [],
     calculatedCounters: null,
-    maxSelectedCount: 6
+    maxSelectedCount: 6,
+    selectedIds: {} // 用于快速查找选中状态
   },
 
   onLoad() {
-    // 页面加载
+    // 初始化英雄列表，添加选中状态
+    this.updateHeroLists();
+  },
+
+  // 更新英雄列表的选中状态
+  updateHeroLists() {
+    const { selectedEnemies, maxSelectedCount } = this.data;
+    const selectedIds = {};
+    selectedEnemies.forEach(h => {
+      selectedIds[h.id] = true;
+    });
+
+    const processHeroes = (heroes) => {
+      return heroes.map(hero => ({
+        ...hero,
+        isSelected: !!selectedIds[hero.id],
+        isDisabled: selectedEnemies.length >= maxSelectedCount && !selectedIds[hero.id]
+      }));
+    };
+
+    this.setData({
+      tankHeroes: processHeroes(HERO_DATA.tank),
+      damageHeroes: processHeroes(HERO_DATA.damage),
+      supportHeroes: processHeroes(HERO_DATA.support),
+      selectedIds
+    });
   },
 
   // 点击英雄
@@ -41,6 +67,9 @@ Page({
       selectedEnemies: [...selectedEnemies]
     });
 
+    // 更新英雄列表状态
+    this.updateHeroLists();
+
     // 计算克制关系
     this.calculateCounters();
   },
@@ -55,6 +84,7 @@ Page({
       selectedEnemies: filtered
     });
 
+    this.updateHeroLists();
     this.calculateCounters();
   },
 
@@ -64,6 +94,7 @@ Page({
       selectedEnemies: [],
       calculatedCounters: null
     });
+    this.updateHeroLists();
   },
 
   // 计算克制关系
