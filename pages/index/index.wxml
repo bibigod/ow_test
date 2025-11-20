@@ -1,5 +1,10 @@
 <!--pages/index/index.wxml-->
 <view class="container">
+  <!-- 浮动跳转按钮 -->
+  <view wx:if="{{showScrollBtn}}" class="scroll-btn" bindtap="scrollToAnalysis">
+    <text class="scroll-btn-icon">↓</text>
+  </view>
+
   <!-- 顶部标题 -->
   <view class="header">
     <view class="header-left">
@@ -141,7 +146,7 @@
   </view>
 
   <!-- 战术分析结果 -->
-  <view wx:if="{{calculatedCounters}}" class="analysis-section">
+  <view wx:if="{{calculatedCounters}}" class="analysis-section" id="analysis-section">
     <view class="analysis-header">
       <view class="analysis-bar"></view>
       <text class="analysis-title">战术 <text class="analysis-highlight">分析</text></text>
@@ -160,7 +165,7 @@
           <view
             wx:for="{{calculatedCounters.tank}}"
             wx:key="name"
-            class="hero-recommendation {{item.score === calculatedCounters.maxScores.tank && calculatedCounters.maxScores.tank > 1 ? 'mvp' : ''}}"
+            class="hero-recommendation {{item.score === calculatedCounters.maxScores.tank && calculatedCounters.maxScores.tank > 1 && item.risks.length === 0 ? 'mvp' : ''}}"
           >
             <view class="rec-left">
               <image
@@ -168,7 +173,7 @@
                 src="{{'/images/' + (item.fullEntry.id === 'wrecking-ball' ? 'ball' : item.fullEntry.id === 'soldier-76' ? 'soldier76' : item.fullEntry.id === 'junker-queen' ? 'junkerqueen' : item.fullEntry.id === 'venture' ? '探奇' : item.fullEntry.id === 'hazard' ? '骇灾' : item.fullEntry.id === 'freja' ? '芙蕾雅' : item.fullEntry.id === 'wuyang' ? '无漾' : item.fullEntry.id) + '.png'}}"
                 mode="aspectFill"
               />
-              <view wx:if="{{item.score === calculatedCounters.maxScores.tank && calculatedCounters.maxScores.tank > 1}}" class="mvp-badge">
+              <view wx:if="{{item.score === calculatedCounters.maxScores.tank && calculatedCounters.maxScores.tank > 1 && item.risks.length === 0}}" class="mvp-badge">
                 <text>⭐ MVP</text>
               </view>
             </view>
@@ -194,7 +199,11 @@
                     />
                     <text class="match-name">针对 {{match.target.name}}</text>
                   </view>
-                  <text class="match-reason">{{match.reason}}</text>
+                  <text class="match-reason">
+                    <block wx:for="{{match.reasonParts}}" wx:for-item="part" wx:for-index="partIndex" wx:key="partIndex">
+                      <text class="{{part.isKeyword ? 'keyword' : ''}}">{{part.text}}</text>
+                    </block>
+                  </text>
                 </view>
               </view>
             </view>
@@ -219,7 +228,7 @@
           <view
             wx:for="{{calculatedCounters.damage}}"
             wx:key="name"
-            class="hero-recommendation {{item.score === calculatedCounters.maxScores.damage && calculatedCounters.maxScores.damage > 1 ? 'mvp' : ''}}"
+            class="hero-recommendation {{item.score === calculatedCounters.maxScores.damage && calculatedCounters.maxScores.damage > 1 && item.risks.length === 0 ? 'mvp' : ''}}"
           >
             <view class="rec-left">
               <image
@@ -227,7 +236,7 @@
                 src="{{'/images/' + (item.fullEntry.id === 'wrecking-ball' ? 'ball' : item.fullEntry.id === 'soldier-76' ? 'soldier76' : item.fullEntry.id === 'junker-queen' ? 'junkerqueen' : item.fullEntry.id === 'venture' ? '探奇' : item.fullEntry.id === 'hazard' ? '骇灾' : item.fullEntry.id === 'freja' ? '芙蕾雅' : item.fullEntry.id === 'wuyang' ? '无漾' : item.fullEntry.id) + '.png'}}"
                 mode="aspectFill"
               />
-              <view wx:if="{{item.score === calculatedCounters.maxScores.damage && calculatedCounters.maxScores.damage > 1}}" class="mvp-badge">
+              <view wx:if="{{item.score === calculatedCounters.maxScores.damage && calculatedCounters.maxScores.damage > 1 && item.risks.length === 0}}" class="mvp-badge">
                 <text>⭐ MVP</text>
               </view>
             </view>
@@ -253,7 +262,11 @@
                     />
                     <text class="match-name">针对 {{match.target.name}}</text>
                   </view>
-                  <text class="match-reason">{{match.reason}}</text>
+                  <text class="match-reason">
+                    <block wx:for="{{match.reasonParts}}" wx:for-item="part" wx:for-index="partIndex" wx:key="partIndex">
+                      <text class="{{part.isKeyword ? 'keyword' : ''}}">{{part.text}}</text>
+                    </block>
+                  </text>
                 </view>
               </view>
             </view>
@@ -278,7 +291,7 @@
           <view
             wx:for="{{calculatedCounters.support}}"
             wx:key="name"
-            class="hero-recommendation {{item.score === calculatedCounters.maxScores.support && calculatedCounters.maxScores.support > 1 ? 'mvp' : ''}}"
+            class="hero-recommendation {{item.score === calculatedCounters.maxScores.support && calculatedCounters.maxScores.support > 1 && item.risks.length === 0 ? 'mvp' : ''}}"
           >
             <view class="rec-left">
               <image
@@ -286,7 +299,7 @@
                 src="{{'/images/' + (item.fullEntry.id === 'wrecking-ball' ? 'ball' : item.fullEntry.id === 'soldier-76' ? 'soldier76' : item.fullEntry.id === 'junker-queen' ? 'junkerqueen' : item.fullEntry.id === 'venture' ? '探奇' : item.fullEntry.id === 'hazard' ? '骇灾' : item.fullEntry.id === 'freja' ? '芙蕾雅' : item.fullEntry.id === 'wuyang' ? '无漾' : item.fullEntry.id) + '.png'}}"
                 mode="aspectFill"
               />
-              <view wx:if="{{item.score === calculatedCounters.maxScores.support && calculatedCounters.maxScores.support > 1}}" class="mvp-badge">
+              <view wx:if="{{item.score === calculatedCounters.maxScores.support && calculatedCounters.maxScores.support > 1 && item.risks.length === 0}}" class="mvp-badge">
                 <text>⭐ MVP</text>
               </view>
             </view>
@@ -312,7 +325,11 @@
                     />
                     <text class="match-name">针对 {{match.target.name}}</text>
                   </view>
-                  <text class="match-reason">{{match.reason}}</text>
+                  <text class="match-reason">
+                    <block wx:for="{{match.reasonParts}}" wx:for-item="part" wx:for-index="partIndex" wx:key="partIndex">
+                      <text class="{{part.isKeyword ? 'keyword' : ''}}">{{part.text}}</text>
+                    </block>
+                  </text>
                 </view>
               </view>
             </view>

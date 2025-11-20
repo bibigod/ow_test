@@ -9,7 +9,8 @@ Page({
     selectedEnemies: [],
     calculatedCounters: null,
     maxSelectedCount: 6,
-    selectedIds: {} // 用于快速查找选中状态
+    selectedIds: {},
+    showScrollBtn: false // 是否显示跳转按钮
   },
 
   onLoad() {
@@ -92,7 +93,8 @@ Page({
   onClearSelection() {
     this.setData({
       selectedEnemies: [],
-      calculatedCounters: null
+      calculatedCounters: null,
+      showScrollBtn: false
     });
     this.updateHeroLists();
   },
@@ -134,7 +136,9 @@ Page({
             scores[role][counterHero.name].score += 1;
             scores[role][counterHero.name].matches.push({
               target: enemy,
-              reason: counter.reason
+              reason: counter.reason,
+              // 处理关键词高亮
+              reasonParts: this.parseKeywords(counter.reason)
             });
           });
         }
@@ -179,7 +183,54 @@ Page({
     });
 
     this.setData({
-      calculatedCounters: result
+      calculatedCounters: result,
+      showScrollBtn: true
+    });
+  },
+
+  // 解析关键词，返回分段数组
+  parseKeywords(text) {
+    const parts = [];
+    let remaining = text;
+
+    while (remaining.length > 0) {
+      let earliestMatch = null;
+      let earliestIndex = remaining.length;
+      let matchedKeyword = '';
+
+      // 找到最早出现的关键词
+      for (const keyword of KEYWORDS) {
+        const index = remaining.indexOf(keyword);
+        if (index !== -1 && index < earliestIndex) {
+          earliestIndex = index;
+          earliestMatch = index;
+          matchedKeyword = keyword;
+        }
+      }
+
+      if (earliestMatch !== null) {
+        // 添加关键词前的普通文本
+        if (earliestIndex > 0) {
+          parts.push({ text: remaining.substring(0, earliestIndex), isKeyword: false });
+        }
+        // 添加关键词
+        parts.push({ text: matchedKeyword, isKeyword: true });
+        remaining = remaining.substring(earliestIndex + matchedKeyword.length);
+      } else {
+        // 没有更多关键词，添加剩余文本
+        parts.push({ text: remaining, isKeyword: false });
+        break;
+      }
+    }
+
+    return parts;
+  },
+
+  // 跳转到分析区域
+  scrollToAnalysis() {
+    wx.pageScrollTo({
+      selector: '#analysis-section',
+      duration: 300
     });
   },
 
