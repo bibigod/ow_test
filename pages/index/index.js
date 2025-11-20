@@ -199,7 +199,8 @@ Page({
       let matchedKeyword = '';
 
       // 找到最早出现的关键词
-      for (const keyword of KEYWORDS) {
+      for (let i = 0; i < KEYWORDS.length; i++) {
+        const keyword = KEYWORDS[i];
         const index = remaining.indexOf(keyword);
         if (index !== -1 && index < earliestIndex) {
           earliestIndex = index;
