@@ -1,0 +1,65 @@
+<!--pages/detail/detail.wxml-->
+<view class="container">
+  <!-- 英雄信息头部 -->
+  <view class="hero-header" wx:if="{{hero}}">
+    <image
+      class="hero-avatar-xl"
+      src="{{'/images/' + (hero.id === 'wrecking-ball' ? 'ball' : hero.id === 'soldier-76' ? 'soldier76' : hero.id === 'junker-queen' ? 'junkerqueen' : hero.id === 'venture' ? '探奇' : hero.id === 'hazard' ? '骇灾' : hero.id === 'freja' ? '芙蕾雅' : hero.id === 'wuyang' ? '无漾' : hero.id) + '.png'}}"
+      mode="aspectFill"
+    />
+    <view class="hero-info">
+      <text class="hero-name-xl">{{hero.name}}</text>
+      <text class="hero-id">{{hero.id}}</text>
+    </view>
+  </view>
+
+  <!-- 风险提示 -->
+  <view wx:if="{{risks.length > 0}}" class="risk-section">
+    <view class="risk-header">
+      <text class="risk-icon">⚠️</text>
+      <text class="risk-title">风险提示</text>
+    </view>
+    <view class="risk-content">
+      <text class="risk-desc">此英雄被以下敌方英雄克制：</text>
+      <view class="risk-list">
+        <view wx:for="{{risks}}" wx:key="id" class="risk-item">
+          <image
+            class="risk-avatar"
+            src="{{'/images/' + (item.id === 'wrecking-ball' ? 'ball' : item.id === 'soldier-76' ? 'soldier76' : item.id === 'junker-queen' ? 'junkerqueen' : item.id === 'venture' ? '探奇' : item.id === 'hazard' ? '骇灾' : item.id === 'freja' ? '芙蕾雅' : item.id === 'wuyang' ? '无漾' : item.id) + '.png'}}"
+            mode="aspectFill"
+          />
+          <text class="risk-name">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 克制详情列表 -->
+  <view class="matches-section">
+    <view class="section-title">
+      <text class="section-icon">🎯</text>
+      <text>克制分析 ({{matches.length}})</text>
+    </view>
+
+    <view class="matches-list">
+      <view wx:for="{{matches}}" wx:key="index" class="match-card">
+        <view class="match-header">
+          <view class="target-info">
+            <image
+              class="target-avatar"
+              src="{{'/images/' + (item.target.id === 'wrecking-ball' ? 'ball' : item.target.id === 'soldier-76' ? 'soldier76' : item.target.id === 'junker-queen' ? 'junkerqueen' : item.target.id === 'venture' ? '探奇' : item.target.id === 'hazard' ? '骇灾' : item.target.id === 'freja' ? '芙蕾雅' : item.target.id === 'wuyang' ? '无漾' : item.target.id) + '.png'}}"
+              mode="aspectFill"
+            />
+            <view class="target-text">
+              <text class="target-label">针对</text>
+              <text class="target-name">{{item.target.name}}</text>
+            </view>
+          </view>
+        </view>
+        <view class="match-reason">
+          <text class="reason-text">{{item.highlightedReason}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,318 @@
+<!--pages/index/index.wxml-->
+<view class="container">
+  <!-- 顶部标题 -->
+  <view class="header">
+    <view class="header-left">
+      <view class="logo">
+        <text class="logo-icon">⚔</text>
+      </view>
+      <view class="title-group">
+        <text class="title">OW2 <text class="title-highlight">克制助手</text></text>
+        <text class="subtitle">S19 / SEASON 2025</text>
+      </view>
+    </view>
+    <view class="header-right" wx:if="{{selectedEnemies.length > 0}}">
+      <button class="reset-btn" bindtap="onClearSelection">
+        <text class="reset-icon">↺</text>
+        <text>重置</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 敌方阵容选择区 -->
+  <view class="selection-section">
+    <view class="section-header">
+      <view class="section-title">
+        <text class="section-icon">🎯</text>
+        <text>选择敌方阵容 (最多6人)</text>
+      </view>
+      <text class="counter {{selectedEnemies.length >= 6 ? 'counter-full' : ''}}">{{selectedEnemies.length}} / 6</text>
+    </view>
+
+    <view class="selection-area {{selectedEnemies.length > 0 ? 'selection-active' : ''}}">
+      <view wx:if="{{selectedEnemies.length === 0}}" class="selection-empty">
+        <text class="empty-icon">👥</text>
+        <text class="empty-text">点击下方英雄图标构建敌方阵容</text>
+      </view>
+      <view wx:else class="selected-heroes">
+        <view
+          wx:for="{{selectedEnemies}}"
+          wx:key="id"
+          class="selected-hero"
+          bindtap="onRemoveEnemy"
+          data-id="{{item.id}}"
+        >
+          <image
+            class="hero-avatar-large"
+            src="{{'/images/' + (item.id === 'wrecking-ball' ? 'ball' : item.id === 'soldier-76' ? 'soldier76' : item.id === 'junker-queen' ? 'junkerqueen' : item.id === 'venture' ? '探奇' : item.id === 'hazard' ? '骇灾' : item.id === 'freja' ? '芙蕾雅' : item.id === 'wuyang' ? '无漾' : item.id) + '.png'}}"
+            mode="aspectFill"
+          />
+          <view class="remove-badge">✕</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 战术分析结果 -->
+  <view wx:if="{{calculatedCounters}}" class="analysis-section">
+    <view class="analysis-header">
+      <view class="analysis-bar"></view>
+      <text class="analysis-title">战术 <text class="analysis-highlight">分析</text></text>
+    </view>
+
+    <!-- 重装推荐 -->
+    <view class="role-card">
+      <view class="role-header tank-header">
+        <view class="role-icon-wrap">
+          <text class="role-icon">🛡</text>
+        </view>
+        <text class="role-name">重装</text>
+      </view>
+      <view class="role-content">
+        <block wx:if="{{calculatedCounters.tank.length > 0}}">
+          <view
+            wx:for="{{calculatedCounters.tank}}"
+            wx:key="name"
+            class="hero-recommendation {{item.score === calculatedCounters.maxScores.tank && calculatedCounters.maxScores.tank > 1 ? 'mvp' : ''}}"
+            bindtap="onViewDetail"
+            data-hero="{{item.fullEntry}}"
+            data-matches="{{item.matches}}"
+            data-risks="{{item.risks}}"
+          >
+            <view class="rec-left">
+              <image
+                class="rec-avatar"
+                src="{{'/images/' + (item.fullEntry.id === 'wrecking-ball' ? 'ball' : item.fullEntry.id === 'soldier-76' ? 'soldier76' : item.fullEntry.id === 'junker-queen' ? 'junkerqueen' : item.fullEntry.id === 'venture' ? '探奇' : item.fullEntry.id === 'hazard' ? '骇灾' : item.fullEntry.id === 'freja' ? '芙蕾雅' : item.fullEntry.id === 'wuyang' ? '无漾' : item.fullEntry.id) + '.png'}}"
+                mode="aspectFill"
+              />
+              <view wx:if="{{item.score === calculatedCounters.maxScores.tank && calculatedCounters.maxScores.tank > 1}}" class="mvp-badge">
+                <text>⭐ MVP</text>
+              </view>
+            </view>
+            <view class="rec-right">
+              <view class="rec-header">
+                <text class="rec-name">{{item.name}}</text>
+                <text class="rec-score">克制指数: {{item.score}}</text>
+              </view>
+              <view wx:if="{{item.risks.length > 0}}" class="risk-warning">
+                <text class="risk-icon">⚠</text>
+                <text class="risk-text">被 </text>
+                <text wx:for="{{item.risks}}" wx:for-item="risk" wx:key="id" class="risk-name">{{risk.name}} </text>
+                <text class="risk-text">克制</text>
+              </view>
+              <view class="rec-preview">
+                <text class="preview-label">针对: </text>
+                <text wx:for="{{item.matches}}" wx:for-item="match" wx:key="target.id" class="preview-target">{{match.target.name}} </text>
+              </view>
+            </view>
+            <view class="rec-arrow">›</view>
+          </view>
+        </block>
+        <view wx:else class="empty-role">
+          <text>暂无推荐</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 输出推荐 -->
+    <view class="role-card">
+      <view class="role-header damage-header">
+        <view class="role-icon-wrap">
+          <text class="role-icon">🎯</text>
+        </view>
+        <text class="role-name">输出</text>
+      </view>
+      <view class="role-content">
+        <block wx:if="{{calculatedCounters.damage.length > 0}}">
+          <view
+            wx:for="{{calculatedCounters.damage}}"
+            wx:key="name"
+            class="hero-recommendation {{item.score === calculatedCounters.maxScores.damage && calculatedCounters.maxScores.damage > 1 ? 'mvp' : ''}}"
+            bindtap="onViewDetail"
+            data-hero="{{item.fullEntry}}"
+            data-matches="{{item.matches}}"
+            data-risks="{{item.risks}}"
+          >
+            <view class="rec-left">
+              <image
+                class="rec-avatar"
+                src="{{'/images/' + (item.fullEntry.id === 'wrecking-ball' ? 'ball' : item.fullEntry.id === 'soldier-76' ? 'soldier76' : item.fullEntry.id === 'junker-queen' ? 'junkerqueen' : item.fullEntry.id === 'venture' ? '探奇' : item.fullEntry.id === 'hazard' ? '骇灾' : item.fullEntry.id === 'freja' ? '芙蕾雅' : item.fullEntry.id === 'wuyang' ? '无漾' : item.fullEntry.id) + '.png'}}"
+                mode="aspectFill"
+              />
+              <view wx:if="{{item.score === calculatedCounters.maxScores.damage && calculatedCounters.maxScores.damage > 1}}" class="mvp-badge">
+                <text>⭐ MVP</text>
+              </view>
+            </view>
+            <view class="rec-right">
+              <view class="rec-header">
+                <text class="rec-name">{{item.name}}</text>
+                <text class="rec-score">克制指数: {{item.score}}</text>
+              </view>
+              <view wx:if="{{item.risks.length > 0}}" class="risk-warning">
+                <text class="risk-icon">⚠</text>
+                <text class="risk-text">被 </text>
+                <text wx:for="{{item.risks}}" wx:for-item="risk" wx:key="id" class="risk-name">{{risk.name}} </text>
+                <text class="risk-text">克制</text>
+              </view>
+              <view class="rec-preview">
+                <text class="preview-label">针对: </text>
+                <text wx:for="{{item.matches}}" wx:for-item="match" wx:key="target.id" class="preview-target">{{match.target.name}} </text>
+              </view>
+            </view>
+            <view class="rec-arrow">›</view>
+          </view>
+        </block>
+        <view wx:else class="empty-role">
+          <text>暂无推荐</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 支援推荐 -->
+    <view class="role-card">
+      <view class="role-header support-header">
+        <view class="role-icon-wrap">
+          <text class="role-icon">💚</text>
+        </view>
+        <text class="role-name">支援</text>
+      </view>
+      <view class="role-content">
+        <block wx:if="{{calculatedCounters.support.length > 0}}">
+          <view
+            wx:for="{{calculatedCounters.support}}"
+            wx:key="name"
+            class="hero-recommendation {{item.score === calculatedCounters.maxScores.support && calculatedCounters.maxScores.support > 1 ? 'mvp' : ''}}"
+            bindtap="onViewDetail"
+            data-hero="{{item.fullEntry}}"
+            data-matches="{{item.matches}}"
+            data-risks="{{item.risks}}"
+          >
+            <view class="rec-left">
+              <image
+                class="rec-avatar"
+                src="{{'/images/' + (item.fullEntry.id === 'wrecking-ball' ? 'ball' : item.fullEntry.id === 'soldier-76' ? 'soldier76' : item.fullEntry.id === 'junker-queen' ? 'junkerqueen' : item.fullEntry.id === 'venture' ? '探奇' : item.fullEntry.id === 'hazard' ? '骇灾' : item.fullEntry.id === 'freja' ? '芙蕾雅' : item.fullEntry.id === 'wuyang' ? '无漾' : item.fullEntry.id) + '.png'}}"
+                mode="aspectFill"
+              />
+              <view wx:if="{{item.score === calculatedCounters.maxScores.support && calculatedCounters.maxScores.support > 1}}" class="mvp-badge">
+                <text>⭐ MVP</text>
+              </view>
+            </view>
+            <view class="rec-right">
+              <view class="rec-header">
+                <text class="rec-name">{{item.name}}</text>
+                <text class="rec-score">克制指数: {{item.score}}</text>
+              </view>
+              <view wx:if="{{item.risks.length > 0}}" class="risk-warning">
+                <text class="risk-icon">⚠</text>
+                <text class="risk-text">被 </text>
+                <text wx:for="{{item.risks}}" wx:for-item="risk" wx:key="id" class="risk-name">{{risk.name}} </text>
+                <text class="risk-text">克制</text>
+              </view>
+              <view class="rec-preview">
+                <text class="preview-label">针对: </text>
+                <text wx:for="{{item.matches}}" wx:for-item="match" wx:key="target.id" class="preview-target">{{match.target.name}} </text>
+              </view>
+            </view>
+            <view class="rec-arrow">›</view>
+          </view>
+        </block>
+        <view wx:else class="empty-role">
+          <text>暂无推荐</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 英雄选择列表 -->
+  <view class="hero-list-section">
+    <!-- 重装 -->
+    <view class="hero-role-section">
+      <view class="role-section-header">
+        <view class="role-section-bar tank-bar"></view>
+        <text class="role-section-icon">🛡</text>
+        <text class="role-section-title">重装 (Tank)</text>
+        <view class="role-section-line"></view>
+      </view>
+      <view class="hero-grid">
+        <view
+          wx:for="{{tankHeroes}}"
+          wx:key="id"
+          class="hero-item {{selectedEnemies.length >= 6 && !isSelected(item.id) ? 'disabled' : ''}} {{selectedEnemies.some(function(h) { return h.id === item.id; }) ? 'selected' : ''}}"
+          bindtap="onHeroTap"
+          data-hero="{{item}}"
+        >
+          <view class="hero-avatar-wrap">
+            <image
+              class="hero-avatar"
+              src="{{'/images/' + (item.id === 'wrecking-ball' ? 'ball' : item.id === 'soldier-76' ? 'soldier76' : item.id === 'junker-queen' ? 'junkerqueen' : item.id === 'venture' ? '探奇' : item.id === 'hazard' ? '骇灾' : item.id === 'freja' ? '芙蕾雅' : item.id === 'wuyang' ? '无漾' : item.id) + '.png'}}"
+              mode="aspectFill"
+            />
+          </view>
+          <text class="hero-name">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 输出 -->
+    <view class="hero-role-section">
+      <view class="role-section-header">
+        <view class="role-section-bar damage-bar"></view>
+        <text class="role-section-icon">🎯</text>
+        <text class="role-section-title">输出 (Damage)</text>
+        <view class="role-section-line"></view>
+      </view>
+      <view class="hero-grid">
+        <view
+          wx:for="{{damageHeroes}}"
+          wx:key="id"
+          class="hero-item {{selectedEnemies.length >= 6 && !isSelected(item.id) ? 'disabled' : ''}} {{selectedEnemies.some(function(h) { return h.id === item.id; }) ? 'selected' : ''}}"
+          bindtap="onHeroTap"
+          data-hero="{{item}}"
+        >
+          <view class="hero-avatar-wrap">
+            <image
+              class="hero-avatar"
+              src="{{'/images/' + (item.id === 'wrecking-ball' ? 'ball' : item.id === 'soldier-76' ? 'soldier76' : item.id === 'junker-queen' ? 'junkerqueen' : item.id === 'venture' ? '探奇' : item.id === 'hazard' ? '骇灾' : item.id === 'freja' ? '芙蕾雅' : item.id === 'wuyang' ? '无漾' : item.id) + '.png'}}"
+              mode="aspectFill"
+            />
+          </view>
+          <text class="hero-name">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 支援 -->
+    <view class="hero-role-section">
+      <view class="role-section-header">
+        <view class="role-section-bar support-bar"></view>
+        <text class="role-section-icon">💚</text>
+        <text class="role-section-title">支援 (Support)</text>
+        <view class="role-section-line"></view>
+      </view>
+      <view class="hero-grid">
+        <view
+          wx:for="{{supportHeroes}}"
+          wx:key="id"
+          class="hero-item {{selectedEnemies.length >= 6 && !isSelected(item.id) ? 'disabled' : ''}} {{selectedEnemies.some(function(h) { return h.id === item.id; }) ? 'selected' : ''}}"
+          bindtap="onHeroTap"
+          data-hero="{{item}}"
+        >
+          <view class="hero-avatar-wrap">
+            <image
+              class="hero-avatar"
+              src="{{'/images/' + (item.id === 'wrecking-ball' ? 'ball' : item.id === 'soldier-76' ? 'soldier76' : item.id === 'junker-queen' ? 'junkerqueen' : item.id === 'venture' ? '探奇' : item.id === 'hazard' ? '骇灾' : item.id === 'freja' ? '芙蕾雅' : item.id === 'wuyang' ? '无漾' : item.id) + '.png'}}"
+              mode="aspectFill"
+            />
+          </view>
+          <text class="hero-name">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部提示 -->
+  <view class="footer-info">
+    <text class="info-icon">ℹ</text>
+    <text class="info-text">数据基于最新赛季版本优化 (S19 Updated)。包含新英雄 Hazard。</text>
+  </view>
+</view>

@@ -1,0 +1,565 @@
+/* pages/index/index.wxss */
+
+.container {
+  padding: 0 24rpx 40rpx;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+/* 顶部标题 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 2rpx solid #e2e8f0;
+  background: #fff;
+  margin: 0 -24rpx;
+  padding-left: 24rpx;
+  padding-right: 24rpx;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.logo {
+  background: #f99e1a;
+  padding: 12rpx;
+  border-radius: 8rpx;
+  transform: skewX(-10deg);
+}
+
+.logo-icon {
+  font-size: 36rpx;
+  color: #fff;
+  transform: skewX(10deg);
+  display: block;
+}
+
+.title-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: 900;
+  color: #1e293b;
+  font-style: italic;
+  letter-spacing: -1rpx;
+}
+
+.title-highlight {
+  color: #f99e1a;
+}
+
+.subtitle {
+  font-size: 18rpx;
+  color: #94a3b8;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+}
+
+.reset-btn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 20rpx;
+  background: #fef2f2;
+  border: 2rpx solid #fecaca;
+  border-radius: 8rpx;
+  color: #ef4444;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.reset-btn::after {
+  border: none;
+}
+
+.reset-icon {
+  font-size: 24rpx;
+}
+
+/* 选择区域 */
+.selection-section {
+  margin-top: 32rpx;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.section-icon {
+  color: #f99e1a;
+}
+
+.counter {
+  font-size: 24rpx;
+  font-weight: 700;
+  font-family: monospace;
+  color: #94a3b8;
+}
+
+.counter-full {
+  color: #ef4444;
+}
+
+.selection-area {
+  min-height: 180rpx;
+  background: #fff;
+  border: 2rpx dashed #cbd5e1;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx;
+  transition: all 0.3s;
+}
+
+.selection-active {
+  border-style: solid;
+  border-color: rgba(249, 158, 26, 0.3);
+  background: rgba(255, 237, 213, 0.3);
+}
+
+.selection-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+  opacity: 0.4;
+}
+
+.empty-icon {
+  font-size: 48rpx;
+  color: #94a3b8;
+}
+
+.empty-text {
+  font-size: 24rpx;
+  color: #64748b;
+}
+
+.selected-heroes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24rpx;
+}
+
+.selected-hero {
+  position: relative;
+}
+
+.hero-avatar-large {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 12rpx;
+  border: 2rpx solid #e2e8f0;
+}
+
+.remove-badge {
+  position: absolute;
+  top: -12rpx;
+  right: -12rpx;
+  width: 36rpx;
+  height: 36rpx;
+  background: #ef4444;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20rpx;
+  border: 3rpx solid #fff;
+  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.2);
+}
+
+/* 分析结果区域 */
+.analysis-section {
+  margin-top: 40rpx;
+}
+
+.analysis-header {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+}
+
+.analysis-bar {
+  width: 6rpx;
+  height: 48rpx;
+  background: #00d4ff;
+}
+
+.analysis-title {
+  font-size: 36rpx;
+  font-weight: 900;
+  font-style: italic;
+  color: #1e293b;
+  letter-spacing: -1rpx;
+}
+
+.analysis-highlight {
+  color: #00d4ff;
+}
+
+/* 角色卡片 */
+.role-card {
+  background: #fff;
+  border-radius: 16rpx;
+  border: 2rpx solid #e2e8f0;
+  overflow: hidden;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.role-header {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 20rpx 24rpx;
+  border-bottom: 2rpx solid;
+}
+
+.tank-header {
+  border-color: #00d4ff;
+  background: rgba(0, 212, 255, 0.1);
+}
+
+.damage-header {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.support-header {
+  border-color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.role-icon-wrap {
+  padding: 8rpx;
+  background: #fff;
+  border-radius: 8rpx;
+  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
+}
+
+.role-icon {
+  font-size: 28rpx;
+}
+
+.role-name {
+  font-size: 28rpx;
+  font-weight: 900;
+  font-style: italic;
+  color: #334155;
+  letter-spacing: 2rpx;
+}
+
+.role-content {
+  padding: 16rpx;
+  background: #f8fafc;
+}
+
+/* 英雄推荐项 */
+.hero-recommendation {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 2rpx solid #e2e8f0;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 16rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-recommendation:last-child {
+  margin-bottom: 0;
+}
+
+.hero-recommendation.mvp {
+  background: rgba(255, 237, 213, 0.5);
+}
+
+.hero-recommendation.mvp::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6rpx;
+  background: linear-gradient(to bottom, #fbbf24, #f97316);
+}
+
+.rec-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+  flex-shrink: 0;
+}
+
+.rec-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 8rpx;
+  border: 2rpx solid #e2e8f0;
+}
+
+.mvp-badge {
+  display: flex;
+  align-items: center;
+  background: #fef3c7;
+  color: #b45309;
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
+  font-size: 18rpx;
+  font-weight: 700;
+  border: 2rpx solid #fde68a;
+}
+
+.rec-right {
+  flex: 1;
+  margin-left: 20rpx;
+  min-width: 0;
+}
+
+.rec-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.rec-name {
+  font-size: 30rpx;
+  font-weight: 900;
+  font-style: italic;
+  color: #1e293b;
+  letter-spacing: -1rpx;
+}
+
+.rec-score {
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
+  border: 2rpx solid #e2e8f0;
+}
+
+.risk-warning {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8rpx;
+  background: #fef2f2;
+  border: 2rpx solid #fecaca;
+  border-radius: 8rpx;
+  padding: 8rpx 12rpx;
+  margin-bottom: 12rpx;
+}
+
+.risk-icon {
+  color: #ef4444;
+  font-size: 22rpx;
+}
+
+.risk-text {
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #dc2626;
+}
+
+.risk-name {
+  font-size: 20rpx;
+  color: #991b1b;
+  background: #fff;
+  padding: 2rpx 8rpx;
+  border-radius: 4rpx;
+  border: 2rpx solid #fecaca;
+}
+
+.rec-preview {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6rpx;
+}
+
+.preview-label {
+  font-size: 20rpx;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.preview-target {
+  font-size: 20rpx;
+  color: #64748b;
+}
+
+.rec-arrow {
+  font-size: 40rpx;
+  color: #cbd5e1;
+  margin-left: 12rpx;
+}
+
+.empty-role {
+  padding: 60rpx;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 24rpx;
+}
+
+/* 英雄列表 */
+.hero-list-section {
+  margin-top: 40rpx;
+}
+
+.hero-role-section {
+  margin-bottom: 48rpx;
+}
+
+.role-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 20rpx;
+  padding-left: 16rpx;
+}
+
+.role-section-bar {
+  width: 6rpx;
+  height: 32rpx;
+  border-radius: 3rpx;
+  margin-left: -16rpx;
+}
+
+.tank-bar {
+  background: #00d4ff;
+}
+
+.damage-bar {
+  background: #ef4444;
+}
+
+.support-bar {
+  background: #22c55e;
+}
+
+.role-section-icon {
+  font-size: 28rpx;
+}
+
+.role-section-title {
+  font-size: 24rpx;
+  font-weight: 900;
+  font-style: italic;
+  color: #334155;
+  letter-spacing: 2rpx;
+}
+
+.role-section-line {
+  flex: 1;
+  height: 2rpx;
+  background: #e2e8f0;
+  margin-left: 16rpx;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20rpx 12rpx;
+}
+
+.hero-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.hero-item.disabled {
+  opacity: 0.3;
+  filter: grayscale(1);
+}
+
+.hero-item.selected .hero-avatar-wrap {
+  border: 3rpx dashed #3b82f6;
+  background: #eff6ff;
+}
+
+.hero-item.selected .hero-avatar {
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+
+.hero-avatar-wrap {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 8rpx;
+  overflow: hidden;
+  background: #fff;
+  border: 2rpx solid #e2e8f0;
+  transform: skewX(-12deg);
+  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.hero-avatar {
+  width: 100%;
+  height: 100%;
+  transform: skewX(12deg) scale(1.2);
+}
+
+.hero-name {
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #475569;
+  text-align: center;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 底部提示 */
+.footer-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  margin-top: 48rpx;
+  padding: 20rpx 24rpx;
+  background: #eff6ff;
+  border: 2rpx solid #bfdbfe;
+  border-radius: 12rpx;
+}
+
+.info-icon {
+  color: #3b82f6;
+  font-size: 28rpx;
+}
+
+.info-text {
+  font-size: 22rpx;
+  color: #2563eb;
+}
