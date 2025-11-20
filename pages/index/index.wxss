@@ -613,35 +613,32 @@
 /* 浮动跳转按钮 */
 .scroll-btn {
   position: fixed;
-  left: 30rpx;
-  bottom: 200rpx;
-  width: 90rpx;
-  height: 90rpx;
-  background: linear-gradient(135deg, #f99e1a, #f97316);
-  border-radius: 50%;
+  left: 24rpx;
+  bottom: 180rpx;
+  width: 100rpx;
+  height: 100rpx;
+  background: linear-gradient(135deg, #00d4ff, #0891b2);
+  border-radius: 16rpx;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8rpx 24rpx rgba(249, 158, 26, 0.5);
+  box-shadow: 0 8rpx 24rpx rgba(0, 212, 255, 0.4);
   z-index: 9999;
+  border: 2rpx solid rgba(255, 255, 255, 0.3);
 }
 
-.scroll-btn-icon {
-  font-size: 36rpx;
+.scroll-btn-text {
+  font-size: 20rpx;
   color: #fff;
-  font-weight: bold;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
-@keyframes pulse {
-  0% {
-    box-shadow: 0 8rpx 24rpx rgba(249, 158, 26, 0.4);
-  }
-  50% {
-    box-shadow: 0 8rpx 32rpx rgba(249, 158, 26, 0.6);
-  }
-  100% {
-    box-shadow: 0 8rpx 24rpx rgba(249, 158, 26, 0.4);
-  }
+.scroll-btn-arrow {
+  font-size: 24rpx;
+  color: #fff;
+  margin-top: 4rpx;
 }
 
 /* 技能关键词高亮 */

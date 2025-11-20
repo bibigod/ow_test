@@ -2,7 +2,9 @@
 <view class="container">
   <!-- 浮动跳转按钮 -->
   <view wx:if="{{selectedEnemies.length > 0}}" class="scroll-btn" bindtap="scrollToAnalysis">
-    <text class="scroll-btn-icon">⚡</text>
+    <text class="scroll-btn-text">克制</text>
+    <text class="scroll-btn-text">分析</text>
+    <text class="scroll-btn-arrow">↓</text>
   </view>
 
   <!-- 顶部标题 -->
